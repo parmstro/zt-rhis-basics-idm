@@ -1,0 +1,54 @@
+---
+virtualmachines:
+  - name: "idmsrv"
+    image: "rhel-10-0-07-09-25-3"
+    bootloader: efi
+    memory: "4G"
+    cores: 1
+    packages:
+      - tmux
+    image_size: "40G"
+    tags:
+      - key: "AnsibleGroup"
+        value: "bastions"
+    networks:
+      - default
+  - name: "node1"
+    image: "rhel-10-0-07-09-25-3"
+    bootloader: efi
+    memory: "4G"
+    cores: 1
+    packages:
+      - tmux
+    image_size: "40G"
+    tags:
+      - key: "AnsibleGroup"
+        value: "bastions"
+    networks:
+      - default
+  - name: "node2"
+    image: "rhel-10-0-07-09-25-3"
+    bootloader: efi
+    memory: "4G"
+    cores: 1
+    packages:
+      - tmux
+    image_size: "40G"
+    tags:
+      - key: "AnsibleGroup"
+        value: "bastions"
+    networks:
+      - default
+  - name: "bastion"
+    image: "rhel-10-0-07-09-25-3"
+    bootloader: efi
+    memory: "4G"
+    cores: 1
+    packages:
+      - tmux
+    image_size: "40G"
+    tags:
+      - key: "AnsibleGroup"
+        value: "bastions"
+    networks:
+      - default
