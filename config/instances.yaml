@@ -1,54 +1,126 @@
 ---
 virtualmachines:
-  - name: "idmsrv"
-    image: "rhel-10-0-07-09-25-3"
+  - name: "idm1"
+#    image: "rhel-10-0-07-09-25-3"
+    image: "rhel-9.7"
     bootloader: efi
     memory: "4G"
     cores: 1
+    image_size: "40G"
+    packages:
+      - git
+      - tmux
+    tags:
+      - key: "AnsibleGroup"
+        value: "nodes"
+    networks:
+      - default
+      - secondary
+    services:
+      - name: idm-webui
+        ports:
+          - port: 80
+            protocol: TCP
+            targetPort: 80
+            name: idm-webui
+
+    routes:
+      - name: idm-webui
+        host: idm-webui
+        service: idm-webui
+        targetPort: 80
+        tls: true
+        tls_termination: edge
+
+  - name: "idm2"
+#    image: "rhel-10-0-07-09-25-3"
+    image: "rhel-9.7"
+    bootloader: efi
+    memory: "4G"
+    cores: 1
+    image_size: "40G"
+    packages:
+      - git
+      - tmux
+    tags:
+      - key: "AnsibleGroup"
+        value: "nodes"
+    networks:
+      - default
+      - secondary
+    services:
+      - name: idm2
+        ports:
+          - port: 443
+            protocol: TCP
+            targetPort: 443
+            name: idm2
+    routes:
+      - name: idm2
+        host: idm2
+        service: idm2
+        targetPort: 443
+
+  - name: "client1"
+#    image: "rhel-10-0-07-09-25-3"
+    image: "rhel-9.7"
+    bootloader: efi
+    memory: "4G"
+    cores: 1
+    image_size: "40G"
+    packages:
+      - git
+      - tmux
+    tags:
+      - key: "AnsibleGroup"
+        value: "nodes"
+    networks:
+      - default
+      - secondary
+
+  - name: "client2"
+#    image: "rhel-10-0-07-09-25-3"
+    image: "rhel-9.7"
+    bootloader: efi
+    memory: "4G"
+    cores: 1
+    image_size: "40G"
+    packages:
+      - git
+      - tmux
+    tags:
+      - key: "AnsibleGroup"
+        value: "nodes"
+    networks:
+      - default
+      - secondary
+
+  - name: "provisioner"
+#    image: "rhel-10-0-07-09-25-3"
+    image: "rhel-9.7"
+    bootloader: efi
+    memory: "4G"
+    cores: 1
+    image_size: "40G"
     packages:
       - tmux
-    image_size: "40G"
     tags:
       - key: "AnsibleGroup"
         value: "bastions"
     networks:
       - default
-  - name: "node1"
-    image: "rhel-10-0-07-09-25-3"
-    bootloader: efi
-    memory: "4G"
-    cores: 1
-    packages:
-      - tmux
-    image_size: "40G"
-    tags:
-      - key: "AnsibleGroup"
-        value: "bastions"
-    networks:
-      - default
-  - name: "node2"
-    image: "rhel-10-0-07-09-25-3"
-    bootloader: efi
-    memory: "4G"
-    cores: 1
-    packages:
-      - tmux
-    image_size: "40G"
-    tags:
-      - key: "AnsibleGroup"
-        value: "bastions"
-    networks:
-      - default
-  - name: "bastion"
-    image: "rhel-10-0-07-09-25-3"
-    bootloader: efi
-    memory: "4G"
-    cores: 1
-    packages:
-      - tmux
-    image_size: "40G"
-    tags:
-      - key: "AnsibleGroup"
-        value: "bastions"
-    networks:
-      - default
+      - secondary
+    services:
+      - name: cockpit
+        ports:
+          - port: 9090
+            protocol: TCP
+            targetPort: 9090
+            name: cockpit
+    routes:
+      - name: cockpit
+        host: cockpit
+        service: cockpit
+        targetPort: 9090
+        tls: true
+        tls_termination: Edge

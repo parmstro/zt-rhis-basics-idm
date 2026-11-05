@@ -3,13 +3,90 @@ antora:
   name: modules
   dir: www
   modules:
-    - name: "01-step01"
-      label: "Step01"
+    - name: "01-introduction"
+      label: "Introduction"
       solveButton: false
-    - name: "02-step2-noreally"
-      label: "Step2 Noreally"
+    - name: "02-clientenrollment"
+      label: "Clientenrollment"
+      solveButton: false
+    - name: "03-usermanagement"
+      label: "Usermanagement"
+      solveButton: false
+    - name: "04-hostbasedaccesscontrol"
+      label: "Hostbasedaccesscontrol"
+      solveButton: false
+    - name: "05-sudo"
+      label: "Sudo"
+      solveButton: false
+    - name: "06-selinuxusermaps"
+      label: "Selinuxusermaps"
+      solveButton: false
+    - name: "07-sshkeymanagement"
+      label: "Sshkeymanagement"
+      solveButton: false
+    - name: "08-replicainstall"
+      label: "Replicainstall"
+      solveButton: false
+    - name: "09-applicationauthz"
+      label: "Applicationauthz"
+      solveButton: false
+    - name: "10-certmanagement"
+      label: "Certmanagement"
+      solveButton: false
+    - name: "11-vaultmanagement"
+      label: "Vaultmanagement"
       solveButton: false
 
 tabs:
-  - name: ">_ terminal"
-    url: /wetty_rhel/ssh/root
+  - name: "IdM Primary"
+    url: /wetty_idmprimary/ssh/root
+    modules: 
+      - 01-introduction
+      - 02-clientenrollment
+      - 03-usermanagement
+      - 04-hostbasedaccesscontrol
+      - 05-sudo
+      - 06-selinuxusermaps
+      - 07-sshkeymanagement
+      - 08-replicainstall
+      - 09-applicationauthz
+      - 10-certmanagement
+      - 11-vaultmanagement
+
+  - name: "IdM Replica"
+    url: /wetty_idmreplica/ssh/root
+    modules: 
+      - 08-replicainstall
+
+  - name: "IdM Client1"
+    url: /wetty_idmclient1/ssh/root
+    modules: 
+      - 01-introduction
+      - 02-clientenrollment
+      - 03-usermanagement
+      - 04-hostbasedaccesscontrol
+      - 05-sudo
+      - 06-selinuxusermaps
+      - 07-sshkeymanagement
+      - 08-replicainstall
+      - 09-applicationauthz
+      - 10-certmanagement
+      - 11-vaultmanagement
+
+  - name: "IdM Client2"
+    url: /wetty_idmclient2/ssh/root
+    modules: 
+      - 09-applicationauthz
+      - 10-certmanagement
+
+
+# The url line uses the name of the *service* entry from the instance.yaml file
+# NOT the hostname/name of the system the name of the server
+# remember you are not dealing with hostnames but rather OCP services and routes
+
+  - name: "IdM Web UI"
+    url: https://idm-webui-${guid}.${domain}/ipa/ui/
+
+  - name: "RHEL Web Console"
+    url: https://cockpit-${guid}.${domain}/
+  

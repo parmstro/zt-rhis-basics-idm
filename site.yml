@@ -1,8 +1,8 @@
 ---
 site:
-  title: "Managing Red Hat Identity Manager as a Lazy Sysadmin"
+  title: "Identity Management Workshop - Part I"
   url: https://github.com/rhpds/showroom_template_zero
-  start_page: modules::01-step01.adoc
+  start_page: modules::01-introduction.adoc
 
 content:
   sources:

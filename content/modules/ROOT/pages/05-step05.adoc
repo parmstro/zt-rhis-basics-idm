@@ -1,0 +1,360 @@
+== Welcome to Module 5
+
+=== Sudo Rule Management
+
+Sudo is a program that allows users to run programs as another user with different privileges.
+Sudo is typically used to allow non-root users to execute administrative commands that are normally reserved for the root user.
+When users need to perform an administrative command they precede the privileged command with sudo. `+sudo <command>+`.
+After entering their password, the command is executed as if they were the privileged user they are mapped to.
+As an example, you can use sudo to run command as a database service account.
+The *_RunAs alias_* for a sudo rule maps a the user to another user or service account.
+
+With IdM, all this can be managed centrally instead of on each individual server.
+This generates a higher degree of consistency in the configuration, simplifies administration, and reduces user error.
+
+=== Exercise 5.1 - Configure a sudo rule policy
+
+We have 2 users in our environment at this time - *_alice_* and *_bob_*.
+*_alice_* is a member of the admins group.
+She is able to login to all machines within the realm.
+When she logs into the machine, as an admin she should be able to act as a root user based on her group membership.
+
+Using the IdM Server tab, let’s authenticate as *_alice_* and ensure that we have a TGT.
+We will then ssh to the client host as alice.
+
+[source,bash]
+----
+kinit alice
+----
+
+Now let’s ssh to the idmclient1 system.
+
+[source,bash]
+----
+ssh alice@idmclient1.example.local
+----
+
+If we are an admin we would expect that we should be able to perform admin like activities like set the message of the day.
+Now since we are not root, we need to use sudo to do this.
+
+[source,bash]
+----
+sudo vim /etc/motd
+----
+
+ooops!
+
+Logout from the client system by typing `+exit+`.
+
+Logout of alice’s context by typing `+kdestroy -A+`.
+kinit as the admin user `+kinit admin+`.
+
+If you were to repeat the previous example now as admin, you would find that you would be successful in setting the motd.
+As we mentioned earlier, the IdM _admins_ group is like a super user for the realm.
+Alice as a member of the sysadmins group does not have the same privilege.
+Separating the realm administration from system administratrion is good security practice.
+
+We can create a sudo rule for the sysadmins group to have super user privilege on a subset the realm’s systems.
+In this case we will set this up for production systems.
+
+If we investigate using the CLI, we find the following:
+
+We want to add a sudo rule for sysadmins group to: 
+
+- run any command 
+- on production systems 
+- as any user 
+- as any group
+
+We can see from the help listing that this command is very similar to the hbacrule-add command we saw in the previous challenge.
+
+Create a new sudo rule named *_sysadmins_allow_all_production_* with a description *_Allow sysadmins group root access to production servers_* that meets the criteria that we specified above.
+
+[source,bash]
+----
+ipa sudorule-add sysadmins_allow_all_production \
+  --desc="Allow sysadmins group root access to production servers" \
+  --cmdcat="all" \
+  --runasusercat="all" \
+  --runasgroupcat="all"
+----
+
+Now lets make sure that this rule applies only to production servers.
+
+[source,bash]
+----
+ipa sudorule-add-host sysadmins_allow_all_production \
+  --hostgroups "production"
+----
+
+Now lets ensure that the sysadmins have this sudo rule applied to them.
+
+[source,bash]
+----
+ipa sudorule-add-user sysadmins_allow_all_production \
+  --groups=sysadmins
+----
+
+Alice should now have sudo access on all the systems in the realm.
+Logout and log back in as alice, then ssh to idmclient1 as alice.
+
+[source,bash]
+----
+kdestroy -A
+----
+
+[source,bash]
+----
+kinit alice
+----
+
+[source,bash]
+----
+ssh alice@idmclient1.example.local
+----
+
+Confirm that you are running with a TGT for alice.
+
+[source,bash]
+----
+klist
+----
+
+Try again to edit the /etc/motd file and provide the password for *_alice_*.
+
+[source,bash]
+----
+ sudo vim /etc/motd
+----
+
+What happens?
+Are you allowed access?
+If you are not allowed, wait for about 5 minutes, or go to the client machine tab and run `+systemctl restart sssd+` to force fetching the updated configuration.
+
+Try again…
+
+You have created your first simple sudo policy.
+We will now make something a little more restrictive for user *_bob_*
+
+=== Exercise 5.2 - Creating sudo commands, command groups, and using them in rules.
+
+==== Exercise 5.2.1 - Prepare IdM objects
+
+The goal of this exercise it to pull together a number of the things that we have learned to give user *bob* access to our client machine and allow him enough authorization to manage the web server that was installed as part of the setup.
+
+For this exercise, use the skills you have learned so far to do the following: 
+
+- create a user group named *webadmins* 
+- add *bob* as a member of *webadmins*
+- create a host group called *webservers*
+- add your *idmclient1* machine to the *webservers* group
+- create an hbac rule named *allow_webadmins_webservers_sshd* to allow *webadmins* to log in to hosts that are part of the *webservers* host group using the *sshd* service
+
+The shell commands to perform this are provided at the end of this section.
+
+Once you have completed creating the above prerequisites, *_bob_* should be able to login to your client, however, he can not use `+su -l+` to create a login shell.
+
+Bob also can’t restart the httpd service using sudo.
+You will find that the error is different for *_bob_* than it was for *_alice_*.
+This is because where the hbac rule for _alice_ was created with *–servicecat=all*, the hbac rule for _bob_ was create to limit access to *_sshd_*
+
+As a webadmin controlling the web services *_bob_* needs to run both `+su -l+` and `+sudo+`.
+Make sure that both commands are added to the list of allowed services in the host based access control rule *allow_webadmins_webservers_sshd*
+
+[source,bash]
+----
+ipa hbacrule-add-service allow_webadmins_webservers_sshd \
+    --hbacsvcs=sudo --hbacsvcs=su-l
+----
+
+Ensure that you logout of the client system and relogin as *_bob_*.
+Now you should be able to use the appropriate commands.
+However, notice that bob still can’t restart httpd
+
+==== Exercise 5.2.2 - Add the commands, command groups and rules
+
+Let’s solve this problem by creating a new sudo rule to give webadmins the appropriate permissions.
+
+[source,bash]
+----
+ipa sudorule-add webadmin_sudo \
+    --runasusercat=all \
+    --runasgroupcat=all
+----
+
+We now need to add the restrictions for groups that the rule applies to and hosts that they are allowed sudo access to.
+
+[source,bash]
+----
+ipa sudorule-add-user webadmin_sudo --groups webadmins
+----
+
+[source,bash]
+----
+ipa sudorule-add-host webadmin_sudo --hostgroups webservers
+----
+
+Great! Now we need to create the commands and command group to restrict their actions to manage the httpd service.
+
+[source,bash]
+----
+ipa sudocmd-add "/usr/bin/systemctl start httpd"
+----
+
+[source,bash]
+----
+ipa sudocmd-add "/usr/bin/systemctl restart httpd"
+----
+
+[source,bash]
+----
+ipa sudocmd-add "/usr/bin/systemctl stop httpd"
+----
+
+Create the group.
+
+[source,bash]
+----
+ipa sudocmdgroup-add webadmin_cmds
+----
+
+[source,bash]
+----
+ipa sudocmdgroup-add-member webadmin_cmds \
+    --sudocmds "/usr/bin/systemctl start httpd" \
+    --sudocmds "/usr/bin/systemctl restart httpd" \
+    --sudocmds "/usr/bin/systemctl stop httpd"
+----
+
+Now we can add the command group to our sudo rule.
+
+[source,bash]
+----
+ipa sudorule-add-allow-command webadmin_sudo \
+    --sudocmdgroups webadmin_cmds
+----
+
+==== Exercise 5.2.3 - Verify sudo access for webadmins.
+
+Login to idmclient1 from idmprimary as bob again using ssh.
+
+Verify that bob can restart the web server.
+
+[source,bash]
+----
+su -l bob
+----
+
+[source,bash]
+----
+sudo systemctl restart httpd
+----
+
+You should see output similar to this:
+
+Remember if you don’t want to wait for the timeout go to the idmclient1
+terminal and restart sssd. Try again.
+
+Is there a problem?
+
+Verify that bob can’t run other commands as root.
+
+[source,bash]
+----
+sudo id
+----
+
+____
+NOTE: The solution for *_Exercise 5.2.1_* command line example is below.
+____
+
+This concludes the module 5 and IdM Workshop - Part I, your Red Hat Team thanks you for participating!
+
+If you are interested in more, IdM Workshop - Part II covers the following:
+
+* SELinux User Mapping
+* SSH key management
+* Replica Deployment
+* Certificate and Service Management
+* User and Service Vaults
+* and more.
+
+If you are in the two day workshop, you can start module 6 on the next page!
+
+=== Solution to Exercise 5.2.1
+
+Login as the admin.
+
+[source,bash]
+----
+kinit admin
+----
+
+Create the *_webadmins_* user group.
+
+[source,bash]
+----
+ipa group-add --desc="Web Application Administrators" webadmins
+----
+
+Add *_bob_* as a member of *_webadmins_*.
+
+[source,bash]
+----
+ipa group-add-member webadmins --users=bob
+----
+
+Create a host group *_webservers_*.
+
+[source,bash]
+----
+ipa hostgroup-add --desc="Web Servers" webservers
+----
+
+Add the idmclient1 system to the webservers host group.
+
+[source,bash]
+----
+ipa hostgroup-add-member webservers --hosts=idmclient1.example.local
+----
+
+Create the hbac rule to allow webadmins access via ssh.
+
+[source,bash]
+----
+ipa hbacrule-add allow_webadmins_webservers_sshd \
+    --desc="Allow webadmins to login to web servers via ssh"
+----
+
+Add the webadmins to the rule.
+
+[source,bash]
+----
+ipa hbacrule-add-user allow_webadmins_webservers_sshd \
+    --groups=webadmins
+----
+
+Add the webservers to the rule.
+
+[source,bash]
+----
+ipa hbacrule-add-host allow_webadmins_webservers_sshd \
+    --hostgroups=webservers
+----
+
+Add the services to the rule.
+
+[source,bash]
+----
+ipa hbacrule-add-service allow_webadmins_webservers_sshd \
+    --hbacsvcs=sshd \
+    --hbacsvcs=sudo \
+    --hbacsvcs=su-l
+----
+
+Test the hbac rule for *_bob_*.
+
+[source,bash]
+----
+ipa hbactest --user=bob --host=idmclient1.example.local --service=sshd
+----

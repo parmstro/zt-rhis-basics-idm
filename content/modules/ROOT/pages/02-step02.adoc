@@ -1,0 +1,96 @@
+== Welcome to challenge 2
+
+=== Preparation
+
+Depending on the Lab environment, we may need to perform a little post deployment configuration.
+Please ask and listen to your instructor to determine with to run the following labsetup.sh script.
+When in doubt, DO NOT run the script.
+This script is required depending on how the cloud instances are configured to support IdM Server.
+We will either be doing automatic or manual discovery of our IdM Server.
+In many implementations, we can use automatic discovery to pick up the SRV records that will direct the client to the IdM server.
+In some environments we rely on other automation or a manual input of domain information.
+
+=== Exercise 2.1 - Configure the IdM client
+
+The IdM client software is not installed by default on a Red Hat Enterprise Linux system.
+On Red Hat Enterprise Linux 9 or later we simply install with the dnf command.
+In this lab, the software packages have been installed as part of the system build.
+
+Our server and client in this lab are running Red Hat Enterprise Linux 9 or 10.
+If you would like to verify that the client package is installed, you can run the following command in the *IdM Client1* terminal window:
+
+[source,bash]
+----
+dnf -y install ipa-client
+----
+
+Now we will configure the client to use our IdM Server. 
+During the setup you will be asked a number of questions, please accept the defaults, *unless outlined below*.
+Run the following command in the *IdM Client* terminal window.
+
+[source,bash]
+----
+ipa-client-install --mkhomedir --enable-dns-updates
+----
+
+As with our server installation, we are using the mkhomedir argument to ensure that a home directory is created for users at first login.
+An alternative is to use automount rules integrated with IdM, if your environment allows.
+
+Our installation of the IdM server creates service (SRV) records in the DNS domain.
+Records like _kerberos-master._tcp point to our idmprimary system and allow applications to discover the IP address of the appropriate systems supplying our IdM services.
+If you have been told in this lab that we are using automatic discovery, the installer will gather all the necessary install information from the idmprimary host.
+
+If you have been told that we will use manual configuration, you will be asked for the name of the domain and the name of the idm server.
+Enter the values below. The unique identifier for your particular instance should be automatically provide as part of the name after 'sandbox'.
+
+The domain is: *example.local*
+
+The server is: *idmclient1.example.local*
+
+You will be asked to verify that you want to proceed with fixed values instead of automatic discovery. Type *yes*.
+
+Next you are asked if you want to specify a list of time servers to use with the client.
+
+Type *no* or press Enter to accept the default.
+
+Time sychronization is configured in the lab for us.
+Time synchronization is important in a kerberos environment as tickets are time limited to address various attacks.
+If time synchronization is too far out between the IdM server and clients, authentication failures occur.
+
+Next, the settings that the installer will use to configure the system are displayed.
+
+Validate that all values are as you expect and then type *yes* and press Enter to continue the configuration of the system with the displayed values.
+
+The installer will prompt you to enter the credentials of a user authorised to enrol computers.
+Use *admin* with the password you configured previously for the IdM Server.
+
+[source,bash]
+----
+redhat2026
+----
+
+The client enrolment will now proceed without further input. 
+The configuration should only takes a few seconds.
+As soon as a system is enrolled, all IdM services are available to the host and to authenticated and authorized users.
+
+
+== Exercise 2.2 - Verify the client installation
+
+Verify that your system has access to the realm by authenicating again as admin
+
+[source,bash]
+----
+kinit admin
+----
+
+No output is good news.
+
+[source,bash]
+----
+klist
+----
+
+You should see the kerberos principal information displayed.
+
+Now that we have successfully configured the server and a client.
+Let’s look at user management in more detail.

@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-14 0 564 600" width="564" height="600" font-family="IBM Plex Sans, system-ui, -apple-system, Segoe UI, sans-serif" role="img"
+     aria-label="The ipa CLI and Web UI manage the IdM server. Active Directory connects through a dashed trust arrow entering the server from the right. The IdM server, marked with a chain icon to show it can be replicated, contains the httpd and IPA framework which writes to the 389 Directory Server, a single LDAP store holding users, groups, hosts, and services. The directory server backs three subsystem services: the Kerberos KDC for tickets in blue, Dogtag CA for certificates in amber, and BIND DNS for records in magenta. Two replicate arrows descend to the replicas section. A full replica marked with a chain icon runs DS in teal, KDC in blue, CA in amber, and DNS in magenta. An ellipsis indicates additional replicas. A partial replica runs only DS and KDC with no CA or DNS. HBAC and sudo authorization rules appear as a paper sheet connected by a dashed line from the right margin. Clients enroll through a dashed line routed down the left margin, and replicas serve them through solid arrows. Each client runs SSSD, certmonger, and a resolver, with a keytab shown as a paper sheet with a key. The client stores identities, tickets in blue, certificates in amber, and records in magenta, matching the issuing services. The legend shows solid arrows for content, dashed arrows for settings, chain icons for replication, paper sheet with key for keytab, and paper sheet for rule.">
+
+<!-- ===== BEGIN PASCAL HEAD (verbatim from assets/pascal-head.svg) ===== -->
+<style>
+  :root {
+    --bg: #f2f2f2;
+    --fg: #151515;
+    --muted: #4d4d4d;
+    --line: #c7c7c7;
+    --box: #ffffff;
+    --band: #e0e0e0;
+    --accent: #ee0000;
+    --accent-soft: #fce3e3;
+    --dev: #0066cc;
+    --bld: #f5921b;
+    --prd: #5e40be;
+    --lib: #37a3a3;
+    --font: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #151515;
+      --fg: #e0e0e0;
+      --muted: #a3a3a3;
+      --line: #383838;
+      --box: #292929;
+      --band: #1f1f1f;
+      --accent: #f56e6e;
+      --accent-soft: #3f0000;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #151515;
+    --fg: #e0e0e0;
+    --muted: #a3a3a3;
+    --line: #383838;
+    --box: #292929;
+    --band: #1f1f1f;
+    --accent: #f56e6e;
+    --accent-soft: #3f0000;
+    color-scheme: dark;
+  }
+
+  svg { background: var(--bg); }
+  .band { fill: var(--band); }
+  .box { fill: var(--box); stroke: var(--line); stroke-width: 1.25; }
+  .hc { fill: var(--band); stroke: var(--line); stroke-width: 1.25; }
+  .chip { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1; }
+  .env-lib { fill: color-mix(in srgb, var(--lib) 22%, var(--box)); stroke: var(--lib); stroke-width: 2; }
+  .env-dev { fill: color-mix(in srgb, var(--dev) 20%, var(--box)); stroke: var(--dev); stroke-width: 2; }
+  .env-bld { fill: color-mix(in srgb, var(--bld) 20%, var(--box)); stroke: var(--bld); stroke-width: 2; }
+  .env-prd { fill: color-mix(in srgb, var(--prd) 20%, var(--box)); stroke: var(--prd); stroke-width: 2; }
+  .clk { fill: none; stroke: var(--fg); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .sheet { fill: var(--box); stroke: var(--line); stroke-width: 1.5; stroke-linejoin: round; }
+  .rule { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .lk { fill: none; stroke: var(--accent); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+  .ky { fill: none; stroke: var(--muted); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+  .t { fill: var(--fg); font-size: 13px; }
+  .tb { fill: var(--fg); font-size: 13px; font-weight: 600; }
+  .tm { fill: var(--muted); font-size: 12px; }
+  .tc { fill: var(--fg); font-size: 12px; font-weight: 500; }
+  .tv { fill: var(--accent); font-size: 12.5px; font-weight: 600; }
+  .cap { fill: var(--muted); font-size: 10.5px; letter-spacing: .09em; font-weight: 600; text-transform: uppercase; }
+  .arr { fill: none; stroke: var(--accent); stroke-width: 2; marker-end: url(#ah); }
+  .arr-s { fill: none; stroke: var(--accent); stroke-width: 1.5; marker-end: url(#ah); }
+  .cfg { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 5 4; marker-end: url(#ahc); }
+  .ah { fill: var(--accent); }
+  .ahc { fill: var(--muted); }
+</style>
+<defs>
+  <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto">
+    <path class="ah" d="M0 0 L10 5 L0 10 z"/>
+  </marker>
+  <marker id="ahc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto">
+    <path class="ahc" d="M0 0 L10 5 L0 10 z"/>
+  </marker>
+  <symbol id="link" viewBox="0 0 24 24">
+    <path class="lk" d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+    <path class="lk" d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+  </symbol>
+  <symbol id="key" viewBox="0 0 24 24">
+    <path class="ky" d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+  </symbol>
+</defs>
+<!-- ===== END PASCAL HEAD ===== -->
+
+  <!-- Management interfaces: the CLI and Web UI are the primary way administrators interact with IdM -->
+  <rect class="box" x="140" y="10" width="160" height="36" rx="6"/>
+  <text class="t" x="220" y="33" text-anchor="middle">ipa CLI · Web UI</text>
+
+  <!-- Active Directory: a peer identity system connected through cross-realm trust -->
+  <rect class="box" x="425" y="10" width="118" height="36" rx="6"/>
+  <text class="t" x="484" y="33" text-anchor="middle">Active Directory</text>
+
+  <!-- IdM server: the primary authority holding all core services; chain icon shows it can be replicated -->
+  <rect class="box" x="20" y="90" width="400" height="232" rx="6"/>
+  <use href="#link" x="34" y="98" width="14" height="14"/>
+  <text class="tb" x="54" y="110">IdM server</text>
+
+  <!-- httpd + IPA: the API layer that all management operations pass through -->
+  <rect class="box" x="85" y="120" width="270" height="34" rx="6"/>
+  <text class="t" x="220" y="141" text-anchor="middle">httpd · IPA framework</text>
+
+  <!-- 389 Directory Server: the single LDAP store backing all IdM data; children are the principal types -->
+  <rect class="box" x="40" y="178" width="360" height="64" rx="6"/>
+  <text class="tb" x="54" y="196">389 Directory Server</text>
+  <text class="tm" x="54" y="210">one LDAP store</text>
+  <rect class="box" x="54" y="216" width="76" height="22" rx="4"/>
+  <text class="tc" x="92" y="231" text-anchor="middle">users</text>
+  <rect class="box" x="140" y="216" width="76" height="22" rx="4"/>
+  <text class="tc" x="178" y="231" text-anchor="middle">groups</text>
+  <rect class="box" x="226" y="216" width="76" height="22" rx="4"/>
+  <text class="tc" x="264" y="231" text-anchor="middle">hosts</text>
+  <rect class="box" x="312" y="216" width="76" height="22" rx="4"/>
+  <text class="tc" x="350" y="231" text-anchor="middle">services</text>
+
+  <!-- Subsystem services: each backed by the directory, colour-coded and carried through to replicas and clients -->
+  <rect class="box env-dev" x="33" y="274" width="112" height="44" rx="6"/>
+  <text class="tb" x="89" y="292" text-anchor="middle" style="font-size:12px">Kerberos KDC</text>
+  <text class="tm" x="89" y="307" text-anchor="middle">tickets</text>
+
+  <rect class="box env-bld" x="164" y="274" width="112" height="44" rx="6"/>
+  <text class="tb" x="220" y="292" text-anchor="middle" style="font-size:12px">Dogtag CA</text>
+  <text class="tm" x="220" y="307" text-anchor="middle">certificates</text>
+
+  <rect class="box env-prd" x="295" y="274" width="112" height="44" rx="6"/>
+  <text class="tb" x="351" y="292" text-anchor="middle" style="font-size:12px">BIND DNS</text>
+  <text class="tm" x="351" y="307" text-anchor="middle">records</text>
+
+  <!-- Replicas: multiple copies of the server, each potentially carrying different optional services -->
+  <text class="cap" x="220" y="357" text-anchor="middle">Replicas</text>
+
+  <!-- Full replica: runs all four components, coloured to match the parent services -->
+  <rect class="box" x="20" y="364" width="194" height="56" rx="6"/>
+  <use href="#link" x="34" y="372" width="14" height="14"/>
+  <text class="tb" x="54" y="384">Replica</text>
+  <rect class="box env-lib" x="33" y="390" width="36" height="22" rx="3"/>
+  <text class="tc" x="51" y="405" text-anchor="middle" style="font-size:11px">DS</text>
+  <rect class="box env-dev" x="75" y="390" width="36" height="22" rx="3"/>
+  <text class="tc" x="93" y="405" text-anchor="middle" style="font-size:11px">KDC</text>
+  <rect class="box env-bld" x="117" y="390" width="36" height="22" rx="3"/>
+  <text class="tc" x="135" y="405" text-anchor="middle" style="font-size:11px">CA</text>
+  <rect class="box env-prd" x="159" y="390" width="36" height="22" rx="3"/>
+  <text class="tc" x="177" y="405" text-anchor="middle" style="font-size:11px">DNS</text>
+
+  <!-- Ellipsis: more replicas of varying configuration -->
+  <text class="tc" x="240" y="398" text-anchor="middle" style="font-size:24px">…</text>
+
+  <!-- Partial replica: runs only the directory and Kerberos, without CA or DNS -->
+  <rect class="box" x="270" y="364" width="190" height="56" rx="6"/>
+  <use href="#link" x="284" y="372" width="14" height="14"/>
+  <text class="tb" x="304" y="384">Replica</text>
+  <rect class="box env-lib" x="283" y="390" width="36" height="22" rx="3"/>
+  <text class="tc" x="301" y="405" text-anchor="middle" style="font-size:11px">DS</text>
+  <rect class="box env-dev" x="325" y="390" width="36" height="22" rx="3"/>
+  <text class="tc" x="343" y="405" text-anchor="middle" style="font-size:11px">KDC</text>
+  <text class="tm" x="375" y="405">no CA, no DNS</text>
+
+  <!-- HBAC/sudo: authorization rules managed by IdM, shown as a rule sheet in the right margin -->
+  <path class="cfg" style="marker-end:none" d="M460 392 H510"/>
+  <g transform="translate(523 392) scale(0.6) translate(-400 -123)">
+    <path class="sheet" d="M382 100 H409 L418 109 V146 H382 Z"/>
+    <path class="rule" d="M409 100 V109 H418"/>
+    <path class="rule" d="M388 114 H412 M388 121 H412 M388 128 H412 M388 135 H398"/>
+  </g>
+  <text class="tb" x="523" y="420" text-anchor="middle" style="font-size:11px">HBAC</text>
+  <text class="tm" x="523" y="432" text-anchor="middle">sudo</text>
+
+  <!-- Enrolled clients: machines that have joined the IdM domain and receive identity services -->
+  <text class="cap" x="220" y="453" text-anchor="middle">Enrolled clients</text>
+
+  <rect class="box" x="20" y="460" width="440" height="72" rx="6"/>
+  <!-- Keytab: a credential file, shown as a paper sheet with a key -->
+  <g transform="translate(38 482) scale(0.5) translate(-400 -123)">
+    <path class="sheet" d="M382 100 H409 L418 109 V146 H382 Z"/>
+    <path class="rule" d="M409 100 V109 H418"/>
+    <path class="rule" d="M388 114 H412 M388 121 H406"/>
+    <use href="#key" x="390" y="124" width="22" height="22"/>
+  </g>
+  <text class="tb" x="58" y="482">Client</text>
+  <text class="t" x="102" y="482">SSSD · certmonger · resolver</text>
+  <!-- Client data stores: coloured to match the services that issue them -->
+  <rect class="box" x="50" y="498" width="84" height="24" rx="4"/>
+  <text class="tc" x="92" y="514" text-anchor="middle">identities</text>
+  <rect class="box env-dev" x="142" y="498" width="70" height="24" rx="4"/>
+  <text class="tc" x="177" y="514" text-anchor="middle">tickets</text>
+  <rect class="box env-bld" x="220" y="498" width="90" height="24" rx="4"/>
+  <text class="tc" x="265" y="514" text-anchor="middle">certificates</text>
+  <rect class="box env-prd" x="318" y="498" width="70" height="24" rx="4"/>
+  <text class="tc" x="353" y="514" text-anchor="middle">records</text>
+
+  <!-- Legend: only the idioms this diagram uses -->
+  <path class="arr-s" d="M30 568 H62"/>
+  <text class="tm" x="70" y="572">content</text>
+  <path class="cfg" d="M128 568 H160"/>
+  <text class="tm" x="168" y="572">settings</text>
+  <use href="#link" x="233" y="561" width="14" height="14"/>
+  <text class="tm" x="255" y="572">replicates</text>
+  <g transform="translate(333 568) scale(0.45) translate(-400 -123)">
+    <path class="sheet" d="M382 100 H409 L418 109 V146 H382 Z"/>
+    <path class="rule" d="M409 100 V109 H418"/>
+    <path class="rule" d="M388 114 H412 M388 121 H406"/>
+    <use href="#key" x="390" y="124" width="22" height="22"/>
+  </g>
+  <text class="tm" x="348" y="572">keytab</text>
+  <g transform="translate(413 568) scale(0.45) translate(-400 -123)">
+    <path class="sheet" d="M382 100 H409 L418 109 V146 H382 Z"/>
+    <path class="rule" d="M409 100 V109 H418"/>
+    <path class="rule" d="M388 114 H412 M388 121 H412 M388 128 H412 M388 135 H398"/>
+  </g>
+  <text class="tm" x="428" y="572">rule</text>
+
+  <!-- DRAWN LAST: arrows whose heads land on boxes, painted after them so arrowheads stay visible -->
+
+  <!-- manage: administrators interact with the server through CLI and Web UI -->
+  <path class="arr" d="M220 46 V90"/>
+  <text class="tv" x="232" y="66">manage</text>
+
+  <!-- trust: Active Directory federation enters the server from the right side -->
+  <path class="cfg" d="M484 46 V110 H420"/>
+  <text class="tm" x="488" y="82">trust</text>
+
+  <!-- write: management operations flow from the API layer into the directory -->
+  <path class="arr" d="M220 154 V178"/>
+  <text class="tv" x="232" y="168">write</text>
+
+  <!-- backs: the directory data backs all three subsystem services -->
+  <path class="arr" d="M220 242 V274"/>
+  <text class="tv" x="232" y="258">backs</text>
+
+  <!-- replicate: server content is replicated to each replica -->
+  <path class="arr" d="M117 322 V364"/>
+  <text class="tv" x="109" y="342" text-anchor="end">replicate</text>
+  <path class="arr" d="M365 322 V364"/>
+  <text class="tv" x="377" y="342">replicate</text>
+
+  <!-- enroll: a client joins the domain through its nearest replica, routed through the left margin -->
+  <path class="cfg" style="stroke-linejoin:round" d="M20 420 H8 V460 H20"/>
+  <text class="tm" x="12" y="442">enroll</text>
+
+  <!-- serve: replicas deliver identity services to enrolled clients -->
+  <path class="arr" d="M117 420 V460"/>
+  <text class="tv" x="129" y="440">serve</text>
+  <path class="arr" d="M365 420 V460"/>
+  <text class="tv" x="377" y="440">serve</text>
+
+</svg>

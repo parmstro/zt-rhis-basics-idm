@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "site.yml": "yaml"
+    },
+    "yaml.schemas": {
+        "https://raw.githubusercontent.com/ansible/schemas/main/f/ansible.json#/$defs/playbook": [
+            "!site.yml"
+        ]
+    }
+}

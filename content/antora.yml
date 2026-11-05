@@ -4,6 +4,6 @@ version: master
 
 asciidoc:
   attributes:
-    lab_name: "Managing Red Hat Identity Manager as a Lazy Sysadmin"
+    lab_name: "Identity Management Workshop - Part I"
     release-version: master
     page-pagination: true

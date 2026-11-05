@@ -1,0 +1,507 @@
+=== Welcome to Module 9
+==== Services and Managing Service certificates
+
+You can configure many kinds of applications to rely on Identity Managements centralised authentication, including web applications.
+In this module, you will configure an Apache web server to use Kerberos authentication to authenticate users, PAM to enforce HBAC rules, and mod_lookup_identity to populate the request environment with user attributes.
+
+All activities in this unit take place on idmclient2 unless otherwise specified. 
+
+Make sure that you are performin operations on the idmclient2 and that you are not connected to another system. 
+
+The demo web application is trivial. 
+It just reads its request environment and responds in plain text with a list of variables starting with the string "REMOTE_". 
+
+It should be up and running already:
+
+[source,bash]
+----
+curl http://idmclient2.example.local
+----
+
+You should see something similar to:
+
+----
+NOT LOGGED IN
+
+REMOTE_* REQUEST VARIABLES:
+
+  REMOTE_ADDR: 192.168.33.20
+  REMOTE_PORT: 34356
+----
+
+If nothing is returned run ensure the proper packages are installed, and enable the httpd service.
+
+[source,bash]
+----
+ sudo dnf -y install firewalld bind-utils net-tools sssd-dbus vim nano ipa-client httpd mod_lookup_identity mod_authnz_pam mod_wsgi mod_auth_gssapi mod_ssl haveged nmap-ncat pamtester bash-completion
+
+ systemctl enable --now httpd
+----
+
+
+=== Exercise 9.1 - Create a service
+
+A service in IdM represents an application we would like to track and authorize on an enrolled system. 
+Create service representing the web application on idmclient2.example.local.
+A service principal name has the service type as its first part, separated from the host name by a slash, e.g. HTTP/www.example.com.
+The host part must be a host enrolled in IdM.
+
+You must be getting the hang of Identity Management by now, so I'll leave the rest of this step up to you. (It's OK to ask for help!)
+
+.Click to reveal
+[%collapsible]
+====
+[source,bash]
+----
+ipa-client-install --mkhomedir --enable-dns-updates
+----
+
+[source,bash]
+----
+ipa service-add HTTP/idmclient2.example.local
+----
+----
+-----------------------------------------------------------
+Added service "HTTP/idmclient2.example.local@EXAMPLE.LOCAL"
+-----------------------------------------------------------
+  Principal name: HTTP/idmclient2.example.local@EXAMPLE.LOCAL
+  Principal alias: HTTP/idmclient2.example.local@EXAMPLE.LOCAL
+  Managed by: idmclient2.example.local
+----
+====
+
+
+=== Exercise 9.2 - Retrieve a Kerberos keytab
+
+Keytabs allow services to securely authenticate with IdM to perform operatations in the realm, like authenticating clients.
+The service needs access to its Kerberos keytab in order to authenticate users.
+Retrieve the key from the FreeIPA server and store it in a keytab file (you will need a TGT for admin):
+
+[source,bash]
+----
+ipa-getkeytab -p HTTP/idmclient2.example.local -k app.keytab
+----
+
+You should see the output below:
+
+----
+Keytab successfully retrieved and stored in: app.keytab
+----
+
+We need to move the file, change its ownership and apply the proper SELinux labels to the keytab file.
+This allows the Apache process which runs under the confined ``apache`` user to read the file and kinit as the service principal.
+
+Run the following commands:
+
+[source,bash]
+----
+sudo mv app.keytab /etc/httpd
+sudo chown apache:apache /etc/httpd/app.keytab
+sudo restorecon /etc/httpd/app.keytab
+----
+
+=== Exercise 9.3 - Enable Kerberos authentication
+
+In this section we will use mod_auth_gssapi to enable Kerberos Negotiate / SPNEGO authentication for a web application.
+
+The Apache configuration for the demo application lives in the file ``/etc/httpd/conf.d/app.conf``.
+Update the configuration (use sudo vim or sudo nano) to enable Kerberos authentication:
+
+----
+<VirtualHost *:80>
+  ServerName client.ipademo.local
+  WSGIScriptAlias / /usr/share/httpd/app.py
+
+  <Location />
+    AuthType GSSAPI
+    AuthName "Kerberos Login"
+    GssapiCredStore keytab:/etc/httpd/app.keytab
+    Require valid-user
+  </Location>
+
+  <Directory /usr/share/httpd>
+    <Files "app.py">
+      Require all granted
+    </Files>
+  </Directory>
+</VirtualHost>
+----
+
+When the configuration is in place, restart Apache:
+
+[source,bash]
+----
+sudo systemctl restart httpd
+----
+
+To test that Kerberos Negotiate authentication is working, kinit and make a request using curl:
+
+[source,bash]
+----
+kinit bob
+----
+
+[source,bash]
+----
+curl -u : --negotiate http://idmclient2.example.local/
+----
+
+You should see output similar to the following:
+
+----
+LOGGED IN AS: bob@EXAMPLE.LOCAL
+
+REMOTE_* REQUEST VARIABLES:
+
+  REMOTE_ADDR: 192.168.33.20
+  REMOTE_USER: bob@EXAMPLE.LOCAL
+  REMOTE_PORT: 42499
+----
+
+The REMOTE_USER variable in the request environment indicates that there is an authenticated user, and identifies that user.
+
+=== Exercise 9.4 - Populating the request environment with user attributes
+
+Applications need to know more than just the username of a logged-in user. 
+They want to know the user's name, how to send mail to their email address and perhaps to know their group memberships or other attributes.
+In this section, we will use mod_lookup_identity to populate the HTTP request environment with variables providing information about the authenticated user.
+
+``mod_lookup_identity`` retrieves user attributes from SSSD (via D-Bus).
+
+- Edit ``/etc/sssd/sssd.conf`` file
+- Enable the SSSD ``ifp`` InfoPipe responder and permit the ``apache`` user to query it.
+- Configure the attributes that you want to expose.
+
+Add the following configuration to sssd.conf:
+
+----
+[domain/ipademo.local]
+...
+ldap_user_extra_attrs = mail, givenname, sn
+
+[sssd]
+services = nss, sudo, pam, ssh, ifp
+...
+
+[ifp]
+allowed_uids = apache, root
+user_attributes = +mail, +givenname, +sn
+----
+
+Restart SSSD:
+
+[source,bash]
+----
+sudo systemctl restart sssd
+----
+
+If you had not added an email address to your users when you created them, you will need to empty the SSSD cache:
+
+[source,bash]
+----
+sudo sss_cache -E
+----
+
+You can test the SSSD InfoPipe directly via the dbus-send utility:
+
+[source,bash]
+----
+sudo dbus-send --print-reply --system \
+    --dest=org.freedesktop.sssd.infopipe /org/freedesktop/sssd/infopipe \
+    org.freedesktop.sssd.infopipe.GetUserAttr string:alice array:string:mail
+----
+
+You should see output similar to the following depending on who you are logged in as, ``alice`` in this example:
+
+----
+method return time=1528050430.867333 sender=:1.147 -> destination=:1.150 serial=5 reply_serial=2
+   array [
+      dict entry(
+         string "mail"
+         variant             array [
+               string "alice@example.local"
+            ]
+      )
+   ]
+----
+
+Now update the Apache configuration file ``/etc/httpd/conf.d/app.conf`` to populate the request environment.
+The LookupUserXXX directives define the mapping of user attributes to request environment variables.
+Multi-valued attributes can be expanded into multiple variables, as in the LookupUserGroupsIter directive.
+Do not forget the LoadModule directive at the top!
+
+[source,bash]
+----
+sudo vim /etc/httpd/conf.d/app.conf
+----
+
+Ensure the file looks like this:
+
+----
+
+LoadModule lookup_identity_module modules/mod_lookup_identity.so
+
+<VirtualHost *:80>
+  ServerName client.ipademo.local
+  WSGIScriptAlias / /usr/share/httpd/app.py
+
+  <Location />
+    AuthType GSSAPI
+    AuthName "Kerberos Login"
+    GssapiCredStore keytab:/etc/httpd/app.keytab
+    Require valid-user
+
+    LookupUserAttr mail REMOTE_USER_MAIL
+    LookupUserAttr givenname REMOTE_USER_FIRSTNAME
+    LookupUserAttr sn REMOTE_USER_LASTNAME
+    LookupUserGroupsIter REMOTE_USER_GROUP
+  </Location>
+
+  ...
+</VirtualHost>
+----
+
+Default SELinux policy prevents Apache from communicating with SSSD over D-Bus.
+Set httpd_dbus_sssd to 1:
+
+[source,bash]
+----
+sudo setsebool -P httpd_dbus_sssd 1
+sudo systemctl restart httpd
+----
+
+Now make another request to the application and observe that user information that was injected into the request environment by mod_lookup_identity is reflected in the response:
+
+[source,bash]
+----
+curl -u : --negotiate http://idmclient2.example.local/
+----
+
+Results for alice:
+----
+LOGGED IN AS: alice@EXAMPLE.LOCAL
+
+REMOTE_* REQUEST VARIABLES:
+
+  REMOTE_USER_GROUP_N: 2
+  REMOTE_ADDR: 192.168.33.20
+  REMOTE_USER_FIRSTNAME: Alice
+  REMOTE_USER_LASTNAME: Armstrong
+  REMOTE_USER: alice@EXAMPLE.LOCAL
+  REMOTE_USER_GROUP_2: ipausers
+  REMOTE_USER_GROUP_1: sysadmin
+  REMOTE_PORT: 42586
+  REMOTE_USER_EMAIL: alice@example.local
+----
+
+Try bob!
+
+==== Exercise 9.5 - HBAC for web services
+
+The final task for this section is to configure Apache to use FreeIPA's HBAC rules for access control.
+Wait, we can do that?
+
+We will use mod_authnz_pam in conjunction with SSSD's PAM responder to achieve this.
+
+First add an HBAC service named app for the web application. You can do this as admin via the Web UI or CLI. Hint: the hbacsvc plugin provides this functionality.
+
+Next, add an HBAC rule allowing members of the sysadmin user group access to app (on any host):
+
+Solution:
+[source,bash]
+----
+ipa hbacrule-add --hostcat=all sysadmin_app
+----
+
+----
+------------------------------
+Added HBAC rule "sysadmin_app"
+------------------------------
+  Rule name: sysadmin_app
+  Host category: all
+  Enabled: TRUE
+----
+
+[source,bash]
+----
+ipa hbacsvc-add app
+----
+
+----
+------------------------
+Added HBAC service "app"
+------------------------
+  Service name: app
+----
+
+[source,bash]
+----
+ipa hbacrule-add-user sysadmin_app --group sysadmins
+----
+
+----
+  Rule name: sysadmin_app
+  Host category: all
+  Enabled: TRUE
+  User Groups: sysadmins
+-------------------------
+Number of members added 1
+-------------------------
+----
+
+[source,bash]
+----
+ipa hbacrule-add-service sysadmin_app --hbacsvcs app
+----
+----
+  Rule name: sysadmin_app
+  Host category: all
+  Enabled: TRUE
+  User Groups: sysadmins
+  Services: app
+-------------------------
+Number of members added 1
+-------------------------
+----
+
+Next, define the PAM service on client.
+The name must match the hbacsvc name (in our case: app), and the name is indicated by the name of the file that configures the PAM stack.
+
+Create /etc/pam.d/app with the following contents
+
+[source,bash]
+----
+vim /etc/pam.d/app
+----
+
+----
+account required   pam_sss.so
+----
+
+Finally, update the Apache configuration  ``/etc/httpd/conf.d/app.conf``. 
+
+[source,bash]
+----
+sudo vim /etc/httpd/conf.d/app.conf
+----
+
+Find the line: valid-user
+
+----
+  7   <Location />
+  8     AuthType GSSAPI
+  9     AuthName "Kerberos Login"
+ 10     GssapiCredStore keytab:/etc/httpd/app.keytab
+ 11     Require valid-user  # THIS ONE
+
+Replace with: pam-account app
+
+  7   <Location />
+  8     AuthType GSSAPI
+  9     AuthName "Kerberos Login"
+ 10     GssapiCredStore keytab:/etc/httpd/app.keytab
+ 11     Require pam-account app  # WITH THIS
+
+----
+
+Also add the LoadModule directive to the top of the apache configuration file:
+
+----
+LoadModule authnz_pam_module modules/mod_authnz_pam.so
+----
+
+What the file should look like.
+
+.Click to reveal
+[%collapsible]
+====
+----
+LoadModule lookup_identity_module modules/mod_lookup_identity.so
+LoadModule authnz_pam_module modules/mod_authnz_pam.so
+
+<VirtualHost *:80>
+  ServerName client.ipademo.local
+  WSGIScriptAlias / /usr/share/httpd/app.py
+
+  <Location />
+    AuthType GSSAPI
+    AuthName "Kerberos Login"
+    GssapiCredStore keytab:/etc/httpd/app.keytab
+    Require pam-account app
+
+    LookupUserAttr mail REMOTE_USER_MAIL
+    LookupUserAttr givenname REMOTE_USER_FIRSTNAME
+    LookupUserAttr sn REMOTE_USER_LASTNAME
+    LookupUserGroupsIter REMOTE_USER_GROUP
+  </Location>
+
+  <Directory /usr/share/httpd>
+    <Files "app.py">
+      Require all granted
+    </Files>
+  </Directory>
+</VirtualHost>
+----
+----
+
+Once again, we must set a special SELinux boolean to allow mod_authnz_pam to work:
+
+[source,bash]
+----
+sudo setsebool -P allow_httpd_mod_auth_pam 1
+----
+
+Restart Apache and try and perform the same curl request again as alice. Everything should work as before because alice is a member of the sysadmin group. What happens when you are authenticated as bob instead?
+
+[source,bash]
+----
+kinit alice
+
+curl -u : --negotiate http://idmclient2.example.local/
+----
+
+----
+LOGGED IN AS: alice@EXAMPLE.LOCAL
+
+REMOTE_* REQUEST VARIABLES:
+
+  REMOTE_USER: alice@EXAMPLE.LOCAL
+  REMOTE_USER_GROUP_1: ipausers
+  REMOTE_USER_GROUP_2: sysadmins
+  REMOTE_USER_GROUP_3: ipausers
+  REMOTE_USER_GROUP_N: 3
+  REMOTE_USER_FIRSTNAME: alice
+  REMOTE_USER_LASTNAME: wonderland
+  REMOTE_USER_MAIL: alice@example.local
+  REMOTE_ADDR: 192.168.0.21
+  REMOTE_PORT: 36778
+----
+
+Before trying as bob make sure to destroy the current token using _*kdestroy -A*_
+
+[source,bash]
+----
+kinit bob
+
+curl -u : --negotiate http://idmclient2.example.local/
+----
+
+----
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<html><head>
+<title>401 Unauthorized</title>
+</head><body>
+<h1>Unauthorized</h1>
+<p>This server could not verify that you
+are authorized to access the document
+requested.  Either you supplied the wrong
+credentials (e.g., bad password), or your
+browser doesn't understand how to supply
+the credentials required.</p>
+</body></html>
+----
+
+This module is now complete. 
+
+Now that you have mastered web app authentication, let's extend the configuration to use TLS for the site.
+

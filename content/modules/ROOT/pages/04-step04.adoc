@@ -1,0 +1,173 @@
+== Welcome to Module 4
+
+=== Managing Host Based Access Control (HBAC) policy
+
+The Host Based Access Control (HBAC) features in IdM allow administrators to define policy to control *who* has access *which hosts* (or host groups) using *which services* (or service group). 
+As you might imagine you could create a fair degree of configuration complexity using HBAC, so the HBAC system also allows you to run tests against these configuration to ensure that they behave as expected.
+
+____
+*ASIDE:* The redhat.rhel_idm ansible collection is available to automate all configuration of Identity Management, from installation, and initial configuration to day to day tasks.
+Being able to treat this configuation as code is hugely valuable, allowing for repeatability and most importantly testability!
+____
+
+=== Exercise 4.1 - Creating a Host Group
+
+Our lab is very simple and it isn’t necessary to create a host group to implement an HBAC policy, however, this is good practice.
+As your environment grows, it becomes simple to add the system to the hostgroup and then inherit the rules.
+This is the same advantage user groups provide for managing users.
+
+Both the Web UI and the CLI can be used complete the following tasks.
+You can choose. 
+The CLI commands will be provided below.
+See if you can perform the tasks by investigating the UI or the CLI rather than simply using cut and paste.
+
+* create a host group called production
+* create a second host group called development
+* add idmclient1.example.local to the production host group
+
+If you are using the command line, here are the tasks.
+Note that this takes two commands to perform this.
+If you guessed that we use the _ipa hostgroup_ topic, you are correct!
+
+First, create the host group. 
+Adding a description that identifies the reason for grouping systems together is a good practice.
+When you start automating these processes with Ansible Automation, it makes for self documenting code and configuration.
+
+[source,bash]
+----
+ipa hostgroup-add --desc "Production Servers" production
+----
+
+Create the *development* host group with a description *Development Servers* using the same process.
+
+[source,bash]
+----
+ipa hostgroup-add --desc "Development Servers" development
+----
+
+You can list all the hostgroups using the hostgroup-find command with no arguments.
+
+[source,bash]
+----
+ipa hostgroup-find
+----
+
+ipaservers is a builtin hostgroup for the IdM domain controllers.
+
+Now let’s add our client system to the production host group.
+
+[source,bash]
+----
+ipa hostgroup-add-member --hosts=idmclient1.example.local production
+----
+
+Verify that you see host in the host group.
+
+[source,bash]
+----
+ipa hostgroup-show production
+----
+
+Now that we have host groups it becomes easier to manage systems and maintain our HBAC rules.
+
+=== HBAC Services, Service Groups, and Rules
+
+Systems have a wide variety of ways that you can interact with them, we can login at a console, we can ssh to them, we can even run cron jobs as a user on them.
+In order to manage how a user interacts with systems we need to define the *ways* in which the user can access the systems.
+This brings in the notion of HBAC services - the *ways*. 
+HBAC Service Groups allow us to make it _easier_ to manage this.
+We can group the services that we want to manage together.
+Luckily, IdM comes preloaded with the common services and service groups.
+You can investigate them in the Web UI.
+
+Navigate to:
+
+Policy > Host-Based Access Control and select HBAC Services or HBAC Service Groups from the drop down to display the lists.
+
+Of course, you can define your own services and service groups.
+
+=== Exercise 4.2 - Creating HBAC Rules
+
+If you select "`HBAC Rules`" you are presented with a list with only two rules *allow_all* and *allow_systemd-user*.
+The allow_all rule does exactly what you would think, it allows all users to access any host from any host using any service.
+The *allow_systemd-user* rules is present to ensure that systemd can still create a users session when allow_all is disabled.
+
+To start creating our own HBAC rules we will create another rule called *admins_allow_all*.
+
+We will set this up so that only the admins group is allowed to access all systems just the same as the allow_all rule.
+Once that is accomplished and our admins can’t get locked out, we will *disable* the allow_all rule.
+We do *not* want to disable *allow_systemd-user*.
+
+Again you can choose to use the Web UI to accomplish this task or use the CLI.
+
+* create an HBAC rule named *admins_allow_all* with a discription *Administrators all access pass* that allows the *admins* AND the *sysadmins* user group.
+* Host category the rule applies to: *Any Host*.
+* Service category the rule applies to: *Any Service*.
+* disable the *allow_all* rule.
+
+If you are using the CLI, you can use the ipa command to give you hints.
+Follow the pattern that we have been learning: ipa *topic-action*, so for this exercise *ipa hbacrule-add –help*.
+
+[source,bash]
+----
+ipa hbacrule-add --help
+----
+
+Let’s use this to create our admins_all_all rule.
+
+[source,bash]
+----
+ipa hbacrule-add --desc "Administrators all access pass" --hostcat="all" --servicecat="all" admins_allow_all
+----
+
+Ensure that our idm admins and system admins are allowed to login to all systems.
+
+[source,bash]
+----
+ipa hbacrule-add-user --groups=admins --groups=sysadmins admins_allow_all
+----
+
+Verify the rule looks as you expect.
+
+[source,bash]
+----
+ipa hbacrule-show admins_allow_all
+----
+
+Now disable the allow_all rule.
+
+[source,bash]
+----
+ipa hbacrule-disable allow_all
+----
+
+That was easy!
+
+=== Exercise 4.3 - Testing HBAC Rules
+
+To test our HBAC rules, it is not practical to impersonate a user and try to login to each system with each protocol and log the results.
+We need a testing tool… ipa hbactest to the rescue.
+
+Since *bob* is not in any rules, lets see what happens for *bob*
+
+[source,bash]
+----
+ipa hbactest --user=bob --host=idmclient1.example.local --service=all
+----
+
+What about *alice* can she access the client host?
+
+[source,bash]
+----
+ipa hbactest --user=alice --host=idmclient1.example.local --service=all
+----
+
+Now try at the command line to ssh from idmprimary in your environment to idmclient1 as *_bob_*.
+What happens?
+Now try at the command line to ssh from the idmprimary in your environment to idmclient1 as *_alice_*.
+What happens?
+
+Is this what you expected?
+
+You have successfully completed the section on HBAC rules. 
+Let’s look at sudo rules next.

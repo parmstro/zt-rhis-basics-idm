@@ -1,0 +1,171 @@
+== Welcome to the Red Hat Infrastructure Standard Basics Lab for Identity Management.
+
+=== Module 1: Introduction
+
+*IMPORTANT: Using this lab*
+
+This text is in a resizable frame. Some of the commands you will need are wider than the default area.
+Use your mouse to grab the resize bar that separates the text from the terminal window and resize the these contents for comfortable viewing.
+
+Some of the commands that you need to execute in the terminal window are provided to you for convenience.
+They are listed in a code formatted area.
+On the right side of the code formatted area there are a couple of buttons.
+The first button copies all the text to the clipboard.
+The second botton actually executes the code in the terminal.
+When possible, try to type and execute the code yourself.
+It helps with learning.
+If you are having trouble, by all means, click away!
+See the example below.
+
+[source,bash]
+----
+echo "I copied this text using the copy button here >>>"
+----
+
+Expected output from commands in the terminal window are also displayed as code.
+
+With that, let’s look at our environment.
+
+==== Environment
+
+The lab environment will consist of the following systems:
+
+* 1 x RHIS provisioner node - provisioner
+* 1 x Red Hat Identity Management (IdM) Primary server - idm1
+* 1 x Red Hat Identity Management (IdM) Replica server - idm2
+* 2 x IdM clients - client1, client2
+
+This is a RHIS automation lab, as with all RHIS automation labs, the vast majority of our work will be done from the provisioner node.
+The provisioner node will store our yaml inventory files for configuring the environment.
+It will also house the rhis-provisioner container. 
+We will launch the rhis-provisioner container and run our commands via ansible "wrapper" scripts for ease of use.
+
+When working with IdM directly to understand our environment, we can consider an IdM Primary server and an IdM Replica server to be identical, the only difference being the order of installation. 
+In more sophisticated installations, we can configure servers to perform different roles to streamline Identity Management processing and operational workflow.
+For our first environment, the will be identical to support full redundancy of services as we have only 2 systems. 
+Identity Management environments can support as many as 64 replicas in a mesh-like configuration. 
+Services may be distributed to optimize replication.
+
+There are additional tabs on the right side of the screen to allow you additional interaction if necessary.
+One tab, is labelled for the idmprimary and one for idmclient1.
+You are logged into the consoles with root access by the environment.
+A local user account has also been created that you can use:
+
+[source,bash,subs="+macros,+attributes",role=execute]
+----
+username: ansiblerunner
+password: {bastion_ssh_password}
+----
+
+This user is a member of wheel and has sudo access.
+
+Use the ansiblerunner account for all operations outside the container unless documented otherwise.
+The an alternative root level account can be accessed should it become necessary.
+Throughout the workshop we will create a variety of other users.
+The instructions will be clear as to what operations are to be performed using a specific login.
+
+==== Let's get started
+=== Exercise 1.1 - Fetch the rhis-builder inventory and container
+
+The Red Hat Infrastructure Standard Builder (rhis-builder) project separates the environment configuration from the code that builds it.
+There are two major componentents that we will use:
+
+- rhis-provisioner container
+- rhis-builder-inventory repository
+
+The rhis-provisioner container is the execution engine. 
+It isolates you from all the dependencies needed to deploy the RHIS architecture.
+The container has all the binary, python and ansible dependencies and the necessary ansible collections necessary.
+It also has the remainder of the rhis-builder repositories baked in. 
+We ensure that this container is scanned for issues and vulnerabilities, generate a sbom and sign the container using sigstore.
+The container is launched and mounts the inventory repo to get its configuration.
+
+The rhis-builder-inventory repo contains all the templates used to build your deployments and the code to generate those deployments.
+We will download a copy of the repository and then examine the components, the elements that we need to change to customize our configuration and generate our deployment.
+
+If you want to save your work from this session, you will need to configure a git remote after you pull the project down.
+You will notice that we are copying the content rather than forking the repository. 
+This is because the resulting repository is fully yours to control, you don't want to merge or push any of your changes to our public repository.
+
+**IMPORTANT:** ALL configuration in the repository is ficticious. DO NOT ADD ANY CORPORATE OR PERSONALLY IDENTIFYING DATA. 
+
+These steps allow you to get the content and create a local git repository.
+
+```
+wget https://github.com/parmstro/rhis-builder-inventory/archive/refs/heads/main.zip
+unzip main.zip
+mv rhis-builder-inventory-main rhis-builder-inventory   # rename it for convenience
+cd rhis-builder-inventory
+git init -b main                                        # you should ensure that the branch is main
+git add * --all
+git commit -m "Initial commit"
+```
+
+If you want to ensure that you have a copy of your work for you to continue to work with you can follow these instructions.
+Please ensure that you have an internet accessible git account that you can access.
+The example below uses github. 
+
+``` 
+git remote add origin https://github.com/<your_org_or_login>/rhis-builder-inventory.git  # or whatever your url is
+git remote -v
+git push -u origin main
+```
+
+== Welcome to the Red Hat Infrastructure Standard Basics Lab for Identity Management.
+
+=== Purpose
+
+The primary purpose of this lab is to introduce participants to the Red Hat Infrastructure Standard (or RHIS) and it components.
+We will do this by using RHIS to build the first RHIS component, Red Hat Identity Management.
+
+Red Hat Identity Management (IdM) is the first of three pillars that supports a RHIS environment. 
+IdM provides RHIS with the core services necessary: Authentication and Authorization, Domain Name Services, and Certificate services. 
+Authentication services are provided via Kerberos (MIT Kerberos).
+Authorization services are controlled by the underlying LDAP implementation (389ds).
+Domain Name Services are provided through bind.
+Certificate Serivces are provide via the integrated CA (dogtag).
+
+
+IdM can also provide integration with external core identity services like Microsoft Active Directory, EntraID, Octa and other OAuth2 / OIDC compliant services.
+IdM is able to centralize these identities and then apply appropriate authorization policy across them so that the policy is consumable by hosts that register to IdM.
+Active Directory integration is limited to those hosts that support SSSD. 
+
+
+There are some caveats the come along with Red Hat IdM implementation. 
+The most important is that because IdM uses Kerberos authentication IdM servers need to exist in their own DNS domain (or subdomain). 
+This is a requirement of Kerberos. 
+Kerberos depends heavily on DNS to provide SRV records to clients for service discovery.
+As an example, for a fictitious organization example.com that following service record exists and points to the two replicating idm servers.
+All is well in the world!
+
+```
+_kerberos-master._tcp      SRV     0 100 88 idm1.example.com.
+                           SRV     0 100 88 idm2.example.com.
+```
+
+However, if we have another idm service in the same domain, or an Active Directory service in the same domain...
+
+```
+_kerberos-master._tcp     SRV     0 100 88 idm1.example.com.
+                          SRV     0 100 88 idm2.example.com.
+                          SRV     0 100 88 addc1.example.com.
+                          SRV     0 100 88 addc2.example.com.
+```
+All is no longer well with the world.
+Now we end up with the same SRV record pointing to systems that maintain 2 different services. 
+Roughly 50% of the time we will get authentication/lookup failures because we are querying 2 different data sources.
+
+
+----
+ASIDE:
+Customers typically implement something like example.com for the main domain and the domain supported by active directory. 
+AD deployments have been the standard for years. 
+The IdM deployment typically becomes a subdomain like linux.example.com.
+The example.com domain then delegates / forwards requests to linux.example.com. 
+We can use many methodologies to manage migrations to a sub domain.
+----
+
+In our lab we will be implementing a simple flat model without delegation.
+As stated the purpose in the lab is to understand how the automation works for day 1 and day 2 operations vs. all the configuration possibilities of IdM.
+The rhis-builder project will support any allowable IdM configuration.
+

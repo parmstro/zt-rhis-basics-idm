@@ -1,0 +1,257 @@
+== Welcome to Module 7
+
+=== SSH Key Management
+
+SSH keys are one of the backbones of Linux access management and administration. 
+Being able to reference the SSH public keys centrally across the infrastructure is a huge benefit. 
+
+==== What you will learn
+
+In this module you will explore how to use FreeIPA as a backend provider for SSH keys.
+Instead of distributing authorized_keys and known_hosts files, SSH keys are uploaded to their corresponding user and host entries in Red Hat Identity Management.
+Users can be authorized to manage their profiles within IdM to manage and update their SSH public keys.
+
+
+=== Exercise 7.1 - Using Identity Management to store SSH _user_ keys
+
+OpenSSH can use public-private key pairs to authenticate users.
+In traditional SSH key management, a user needing to access a particular host can get his or her public key added to an authorized_keys file on the target host.
+When the user attempts to log in, the originating system provided the public key and the target host grants access to the system if the public key is in an authorized_keys file. There are system-wide and per-user authorized_keys files, but if the target systems do not mount a network-backed home directory (e.g. NFS), then the user public key must be copied to every system that the user needs to log in to.
+
+On IdM-enrolled systems, the SSSD service can be configured to retrieve and cache user SSH keys from Identity Management.
+Applications and services then only have to look in one location for user public keys. 
+Identity Management becomes the centralized repository of keys, which users can manage themselves.
+Administrators do not need to worry about distributing, updating or verifying user SSH keys.
+And, as we will see later, through Identity Management Replica servers the system becomes highly available and distributed
+
+Let's start by generating a user key pair for *_alice_* on the one of the client systems:
+
+[source,bash]
+----
+sudo -i -u alice
+----
+
+[source,bash]
+----
+ ssh-keygen -t ed25519 -C alice@example.local
+----
+
+When prompted for a password use ``redhat2026``
+
+The command generates a new key pair for Alice using an ed25519 cipher. Your output should look similar to:
+
+----
+Generating public/private ed25519 key pair.
+Enter file in which to save the key (/home/alice/.ssh/id_ed25519): 
+Enter passphrase (empty for no passphrase): 
+Enter same passphrase again: 
+Your identification has been saved in /home/alice/.ssh/id_ed25519
+Your public key has been saved in /home/alice/.ssh/id_ed25519.pub
+The key fingerprint is:
+SHA256:k9ETnpZvRm20qVE9tUF82bMeamGmUyIYKtQMrLt9baI alice@example.local
+The key's randomart image is:
++--[ED25519 256]--+
+|  ..+     .   =+=|
+|   o o . o + + B*|
+|  o   . + B o =.=|
+| . . . . = = O o |
+|  . .   S . @ + .|
+| .       . = o . |
+|  o   .     o    |
+| . . o o         |
+|   Eo o          |
++----[SHA256]-----+
+----
+
+By default, ssh-keygen will create an private key with an RSA 2048 bit cipher.
+Consider ensuring that you use a stronger cipher. 
+For alice, we using the ed25519 cipher which combines Edwards curve and Curve25519 to generate a fast and secure key.
+It provides 128-bit security with 32-*byte* public keys and 64-*byte* signatures.
+Our security team at example.local has recommended this as our minimum. 
+
+SSH key ciphers requirements will be outlined by your IT Security team and they may generate them for users.
+
+If you are using RHEL 10 or later we can start using Module-Lattice based Key Encapsulation Mechanism keys. 
+Please see the demonstration below.
+
+
+The public key is stored in ``/home/alice/.ssh/id_ed25519.pub`` in an OpenSSH-specific format.
+Alice can now upload it to her user entry in IdM using the command below:
+
+[source,bash]
+----
+kinit alice
+----
+
+[source,bash]
+----
+ipa user-mod alice \
+  --sshpubkey="$(cat /home/alice/.ssh/id_ed25519.pub)"
+----
+
+After executing the above commands, you should see output similar to the following:
+
+----
+---------------------
+Modified user "alice"
+---------------------
+  User login: alice
+  First name: alice
+  Last name: Wonderland
+  Home directory: /home/alice
+  Login shell: /bin/sh
+  Principal name: alice@EXAMPLE.LOCAL
+  Principal alias: alice@EXAMPLE.LOCAL
+  Email address: alice@example.local
+  UID: 853000003
+  GID: 853000003
+  SSH public key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIMx45YjgdJqifr9fndzQ6sZJR7U3HJYXSxz89tsGDoa alice@example.local
+  SSH public key fingerprint: SHA256:BVuM4BFvQ79dnaRsgp6yxFMGWVDoPJYT/A4Y4WhyT1A alice@example.local (ssh-ed25519)
+  Account disabled: False
+  Password: True
+  Member of groups: sysadmins, ipausers
+  Indirect Member of Sudo rule: sysadmins_allow_all_production
+  Indirect Member of HBAC rule: admins_allow_all
+  Kerberos keys available: True
+----
+
+During enrolment of the systems, SSSD has been configured to use IdM as one of its identity domains and OpenSSH has been configured to use SSSD for managing user keys.
+
+We need to make sure that Alice has access to the systems via SSH.
+If you have disabled the allow_all HBAC rule, add a new rule that will allow ``alice`` to access the ``sshd`` service on any host.
+
+Logging in to the server using SSH public key authentication should now work.
+We ensure that we are not using our kerberos login by specifying the following:
+
+
+[source,bash]
+----
+ssh -o GSSAPIAuthentication=no idmprimary.example.local
+----
+
+If you are prompted for a passphrase, use ``redhat2026``.
+
+Your output should be similar to:
+
+----
+Enter passphrase for key '/home/alice/.ssh/id_ed25519':
+Last login: Fri Feb 13 15:52:13 2026
+[alice@idmprimary]$
+----
+
+To verify that the SSH public key was used for authentication, you can check the sshd log on the server:
+
+[source,bash]
+----
+sudo journalctl -u sshd -S "5 minutes ago" --no-pager
+----
+
+You shouold see a log output similar to the following:
+
+----
+-- Logs begin at Tue 2026-02-10 09:01:11 UTC, end at Fri 2026-02-13 16:55:19 UTC. --
+Feb 13 16:51:52 idmprimary.example.local sshd[8570]: Accepted publickey for alice from 192.168.33.20 port 57596 ssh2: ed25519 SHA256:3n9y/wIG9q5kZ5KhlJF7+vc+sgboN+nMNOGZilf2734
+----
+
+=== Exercise 7.2 - Using IdM as a backend store for SSH _host_ keys
+
+OpenSSH uses public keys to authenticate hosts.
+When a client attempts to log in over SSH, the target host presents its public key.
+The first time the host authenticates, the user may have to examine the target host's public key and manually authenticate it.
+The client then stores the host's public key in a known_hosts file.
+On subsequent attempts to log in, the client checks its known_hosts files.
+If the presented host key does not match the stored host key, the OpenSSH client refuses to continue.
+
+Based on the last exercise, try to figure out how to upload SSH *_host_* keys to the IdM server.
+
+*NOTE:* OpenSSH has already been configured to look up known hosts on the IdM server, so no manual configuration is required for this section.sudo -i -u alice
+
+
+'''
+==== Demonstration 7.3 - Create Post Quantum Cryptography ready ssh keys on RHEL 10
+
+
+NOTE: ssh on the source and target servers needs to be able to negotiate the appropriate key exchange.
+
+NOTE: At the time of this writing, ssh in RHEL 9.7 does not yet support PQC-safe ML-KEM key exchange, as it is still prioritizing stability in that area.
+If you require PQ-OpenSSH support, you will require RHEL 10.
+In general, RHEL 9.7 and later are moving towards support PQC-safe algorithms. 
+There is limited support today. 
+
+Cryptographic Libraries: 
+RHEL 9.7 includes rebased libraries, specifically OpenSSL 3.5 and updated NSS, which support post-quantum algorithms.
+
+Supported Algorithms: 
+The PQC support enables hybrid ML-KEM (Module-Lattice-Based Key-Encapsulation Mechanism) for key exchange and ML-DSA (Module-Lattice-Based Digital Signature Algorithm) for digital signatures.
+
+FIPS Mode: Hybrid ML-KEM key exchange is supported in FIPS mode in RHEL 9.7.
+RPM Signing: RHEL 9.7 introduces rust-rpm-sequoia, allowing verification of OpenPGP v6 signatures on RPM packages. 
+
+
+Here is an example of the commands that will be run in the demonstration.
+Discuss with your workshop instructors.
+
+[source,bash]
+----
+# Use these when running RHEL 9.7
+sudo update-crypto-policies --set DEFAULT:PQ
+update-crypto-policies --show
+----
+
+----
+sudo dnf -y install crypto-policies-pq-preview crypto-policies-scripts
+sudo update-crypto-policies --set DEFAULT:TEST-PQ
+
+...
+# output recommends a reboot
+
+sudo systemctl reboot
+
+# Wait for system to come back up
+# Login again
+
+ssh-keygen -t ecdsa-sha2-nistp256 
+
+Generating public/private ecdsa-sha2-nistp256 key pair.
+Enter file in which to save the key (/home/parmstro/.ssh/id_ecdsa): 
+Created directory '/home/parmstro/.ssh'.
+Enter passphrase for "/home/parmstro/.ssh/id_ecdsa" (empty for no passphrase): 
+Enter same passphrase again: 
+Passphrases do not match.  Try again.
+Enter passphrase for "/home/parmstro/.ssh/id_ecdsa" (empty for no passphrase): 
+Enter same passphrase again: 
+Your identification has been saved in /home/parmstro/.ssh/id_ecdsa
+Your public key has been saved in /home/parmstro/.ssh/id_ecdsa.pub
+The key fingerprint is:
+SHA256:eC7RvXUmZbz8IsSz/jUV6zasCT16pdfEsKH9Cjixl2o parmstro@testdevrhel10vm.parmstrong.ca
+The key's randomart image is:
++---[ECDSA 256]---+
+|                 |
+|             .   |
+|              +. |
+|       o . . +o.o|
+|      o S o *o=*.|
+|       +   BoB=o+|
+|      . . =.*o+O+|
+|       .  E=o==+=|
+|         ...o++. |
++----[SHA256]-----+
+
+parmstro@parmstro-thinkpadt14gen5:~$ ssh -i ~/.ssh/id_ecdsa.pub testdevrhel10vm.parmstrong.ca
+Web console: https://testdevrhel10vm.parmstrong.ca:9090/ or https://192.168.252.101:9090/
+
+Last login: Wed Mar 25 19:07:08 2026 from ::ffff:192.168.253.1
+parmstro@testdevrhel10vm:~$ 
+----
+
+This completes the module on managing SSH keys with Red Hat Identity Management.
+
+=== What you should have learned
+
+Red Hat Identity Management is capable of:
+
+- Centrally managing USER SSH keys and allowing users to manage their own public keys
+- Centrally managing HOST SSH keys, this is automated as part of the host enrolment process
+- Additionally, you can specify that IdM can manage SSH fingerprints in DNS as well
+
+Let's look at the next section and how we can deploy a Red Hat Identity Management replica server.

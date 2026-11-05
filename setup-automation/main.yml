@@ -11,6 +11,21 @@
       ansible_ssh_port: "{{ lookup('ansible.builtin.env', 'BASTION_PORT') }}"
       ansible_ssh_user: "{{ lookup('ansible.builtin.env', 'BASTION_USER') }}"
       ansible_ssh_pass: "{{ lookup('ansible.builtin.env', 'BASTION_PASSWORD') }}"
+  - name: Add nodes
+    ansible.builtin.add_host:
+      name: "{{ item }}"
+      ansible_ssh_host: "{{ item }}"
+      ansible_ssh_port: "{{ lookup('ansible.builtin.env', 'BASTION_PORT') }}"
+      ansible_ssh_user: "{{ lookup('ansible.builtin.env', 'BASTION_USER') }}"
+      ansible_ssh_pass: "{{ lookup('ansible.builtin.env', 'BASTION_PASSWORD') }}"
+      ansible_python_interpreter: /usr/libexec/platform-python
+    loop:
+      - idm1
+      - idm2
+      - client1
+      - client2
+      - provisioner
+  
 - name: Demo Playbook for the ansible-runner API
   hosts: all:!localhost
   gather_facts: false
@@ -49,6 +64,9 @@
     shell: "sh -x /tmp/setup-scripts/setup-{{ ansible_host }}.sh > /tmp/setup-scripts/setup-{{ ansible_host }}.log 2>&1"
     become: true
     register: r_result
+    environment:
+      GUID: "{{ lookup('ansible.builtin.env', 'GUID') }}"
+      DOMAIN: "{{ lookup('ansible.builtin.env', 'DOMAIN') }}"
 
   - name: Output script result
     ansible.builtin.debug:
@@ -74,4 +92,3 @@
     when:
     - r_result is defined
     - r_result.rc != 0
-
