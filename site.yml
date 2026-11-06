@@ -1,6 +1,6 @@
 ---
 site:
-  title: "Identity Management Workshop - Part I"
+  title: "Red Hat Infrastructure Standard Basics Lab"
   url: https://github.com/rhpds/showroom_template_zero
   start_page: modules::01-introduction.adoc
 

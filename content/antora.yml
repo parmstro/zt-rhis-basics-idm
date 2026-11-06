@@ -4,6 +4,6 @@ version: master
 
 asciidoc:
   attributes:
-    lab_name: "Identity Management Workshop - Part I"
+    lab_name: "Red Hat Infrastructure Standard Basics Lab"
     release-version: master
     page-pagination: true

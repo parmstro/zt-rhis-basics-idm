@@ -91,7 +91,11 @@ This is because the resulting repository is fully yours to control, you don't wa
 
 These steps allow you to get the content and create a local git repository.
 
+Run these steps on the provisioner node as the ansiblerunner user in the ansiblerunner home directory.
+
 ```
+mkdir rhis
+cd rhis
 wget https://github.com/parmstro/rhis-builder-inventory/archive/refs/heads/main.zip
 unzip main.zip
 mv rhis-builder-inventory-main rhis-builder-inventory   # rename it for convenience
@@ -100,6 +104,166 @@ git init -b main                                        # you should ensure that
 git add * --all
 git commit -m "Initial commit"
 ```
+
+You will get output that looks like this.
+
+```
+$ wget https://github.com/parmstro/rhis-builder-inventory/archive/refs/heads/main.zip
+unzip main.zip
+mv rhis-builder-inventory-main rhis-builder-inventory   # rename it for convenience
+cd rhis-builder-inventory
+git init -b main                                        # you should ensure that the branch is main
+git add * --all
+git commit -m "Initial commit"
+
+--2026-11-05 19:42:57--  https://github.com/parmstro/rhis-builder-inventory/archive/refs/heads/main.zip
+Resolving github.com (github.com)... 140.82.114.3
+Connecting to github.com (github.com)|140.82.114.3|:443... connected.
+HTTP request sent, awaiting response... 302 Found
+Location: https://codeload.github.com/parmstro/rhis-builder-inventory/zip/refs/heads/main [following]
+--2026-11-05 19:42:57--  https://codeload.github.com/parmstro/rhis-builder-inventory/zip/refs/heads/main
+Resolving codeload.github.com (codeload.github.com)... 140.82.114.9
+Connecting to codeload.github.com (codeload.github.com)|140.82.114.9|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: unspecified [application/zip]
+Saving to: ‘main.zip’
+
+main.zip                                            [     <=>                                                                                             ]   5.40M  4.89MB/s    in 1.1s    
+
+2026-11-05 19:42:59 (4.89 MB/s) - ‘main.zip’ saved [5664985]
+
+Archive:  main.zip
+0e8c806f95e649971391e0e95f05b169e519b183
+   creating: rhis-builder-inventory-main/
+  inflating: rhis-builder-inventory-main/.ansible-lint  
+  inflating: rhis-builder-inventory-main/.gitignore  
+  inflating: rhis-builder-inventory-main/LICENSE  
+  inflating: rhis-builder-inventory-main/README.md  
+....
+.... Lots of files
+....
+  inflating: rhis-builder-inventory-main/update_containers.sh  
+  inflating: rhis-builder-inventory-main/update_transfer_bundle.sh  
+ extracting: rhis-builder-inventory-main/version.txt  
+Initialized empty Git repository in /home/ansiblerunner/demo/rhis-builder-inventory/.git/
+The following paths are ignored by one of your .gitignore files:
+example.ca.25.sh
+hint: Use -f if you really want to add them.
+hint: Disable this message with "git config set advice.addIgnoredFile false"
+[main (root-commit) f363d54] Initial commit
+ 350 files changed, 1095871 insertions(+)
+ create mode 100644 LICENSE
+ create mode 100644 README.md
+ create mode 100644 docs/inventory_addressing.md
+ create mode 100755 export_deployment.sh
+ create mode 100644 export_deployment.yml
+ create mode 100644 inventory_basevars.yml
+ create mode 100644 inventory_basevars_limits.yml
+ create mode 100644 inventory_template/external_tasks/README.md
+ create mode 100644 inventory_template/external_tasks/mytask.yml
+ create mode 100644 inventory_template/files/README.md
+....
+.... Lots of files
+.... 
+ create mode 100755 update_containers.sh
+ create mode 100755 update_transfer_bundle.sh
+ create mode 100644 version.txt
+```
+
+Running git status should show you on branch main, with some hidden files not committed.
+```
+git status
+```
+
+Output:
+```
+On branch main
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	.ansible-lint
+	.gitignore
+
+nothing added to commit but untracked files present (use "git add" to track)
+```
+
+Running tree -L 1 should look like the following:
+```
+.
+├── docs
+├── example.ca.25.sh
+├── export_deployment.sh
+├── export_deployment.yml
+├── inventory_basevars_limits.yml
+├── inventory_basevars.yml
+├── inventory_template
+├── inventory_update.sh
+├── inventory_update_subtasks
+├── inventory_update.yml
+├── LICENSE
+├── migrate_inventory_variables.sh
+├── migrate_remove_pxegrub.sh
+├── preflight_check.sh
+├── preflight_check.yml
+├── README.md
+├── register_provisioner_to_idm.sh
+├── register_provisioner_to_idm.yml
+├── rh_iso_download.sh
+├── run_container.sh
+├── schema
+├── scripts
+├── transfer_drive
+├── update_containers.sh
+├── update_transfer_bundle.sh
+└── version.txt
+```
+
+The last thing to do in this section is to get the rhis-provisioner container.
+There is a help script for this in the root of the rhis-builder-inventory repository.
+
+```
+cd ~/rhis/rhis-builder-inventory
+./update_containers.sh
+```
+
+Your output should be similar to:
+```
+Trying to pull quay.io/parmstro/rhis-provisioner-9-2.5:latest...
+Getting image source signatures
+Copying blob c972d486b5cc skipped: already exists  
+Copying blob c972d486b5cc skipped: already exists  
+...
+... many lines ...
+...
+Copying blob 11793e59cca1 skipped: already exists  
+Copying blob d0ec689a4fa5 skipped: already exists  
+Copying config 7965ed40c8 done   | 
+Writing manifest to image destination
+7965ed40c8843f6b41cf1e6f200971c4fac5dad93186b65a4d3b850026c37d27
+All containers refreshed!
+```
+
+You may see an error indicating that the script failed to pull the rhis-builder-ui container. 
+This is expected as it is not released yet.
+
+Run podman images to ensure that you can see the container is added. 
+The minimum tag for this course should be 1.0.146
+
+```
+podman images
+```
+
+```
+[ansiblerunner@provisioner rhis-builder-inventory]$ podman images
+REPOSITORY                                TAG                   IMAGE ID      CREATED       SIZE
+localhost/rhis-provisioner-9-2.5          1.0.146               7965ed40c884  0 days ago    581 MB
+quay.io/parmstro/rhis-provisioner-9-2.5   1.0.146               7965ed40c884  0 days ago    581 MB
+quay.io/parmstro/rhis-provisioner-9-2.5   latest                7965ed40c884  0 days ago    581 MB
+localhost/rhis-provisioner-9-2.5          latest                7965ed40c884  0 days ago    581 MB
+```
+
+You can proceed to module 02 or continue reading.
+
+
 
 If you want to ensure that you have a copy of your work for you to continue to work with you can follow these instructions.
 Please ensure that you have an internet accessible git account that you can access.
@@ -111,9 +275,9 @@ git remote -v
 git push -u origin main
 ```
 
-== Welcome to the Red Hat Infrastructure Standard Basics Lab for Identity Management.
 
-=== Purpose
+=== Additional Reading
+==== Purpose
 
 The primary purpose of this lab is to introduce participants to the Red Hat Infrastructure Standard (or RHIS) and it components.
 We will do this by using RHIS to build the first RHIS component, Red Hat Identity Management.

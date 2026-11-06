@@ -6,78 +6,73 @@ antora:
     - name: "01-introduction"
       label: "Introduction"
       solveButton: false
-    - name: "02-clientenrollment"
-      label: "Clientenrollment"
+    - name: "02-step02"
+      label: "step02"
       solveButton: false
-    - name: "03-usermanagement"
-      label: "Usermanagement"
+    - name: "03-step03"
+      label: "step03"
       solveButton: false
-    - name: "04-hostbasedaccesscontrol"
-      label: "Hostbasedaccesscontrol"
+    - name: "04-step04"
+      label: "step04"
       solveButton: false
-    - name: "05-sudo"
-      label: "Sudo"
+    - name: "05-step05"
+      label: "step05"
       solveButton: false
-    - name: "06-selinuxusermaps"
-      label: "Selinuxusermaps"
+    - name: "06-step06"
+      label: "step06"
       solveButton: false
-    - name: "07-sshkeymanagement"
-      label: "Sshkeymanagement"
+    - name: "07-step07"
+      label: "step07"
       solveButton: false
-    - name: "08-replicainstall"
-      label: "Replicainstall"
+    - name: "08-step08"
+      label: "step08"
       solveButton: false
-    - name: "09-applicationauthz"
-      label: "Applicationauthz"
+    - name: "09-step09"
+      label: "step09"
       solveButton: false
-    - name: "10-certmanagement"
-      label: "Certmanagement"
-      solveButton: false
-    - name: "11-vaultmanagement"
-      label: "Vaultmanagement"
+    - name: "10-step10"
+      label: "step10"
       solveButton: false
 
 tabs:
-  - name: "IdM Primary"
-    url: /wetty_idmprimary/ssh/root
+  - name: "idm1"
+    url: /wetty_idm1/ssh/root
     modules: 
       - 01-introduction
-      - 02-clientenrollment
-      - 03-usermanagement
-      - 04-hostbasedaccesscontrol
-      - 05-sudo
-      - 06-selinuxusermaps
-      - 07-sshkeymanagement
-      - 08-replicainstall
-      - 09-applicationauthz
-      - 10-certmanagement
-      - 11-vaultmanagement
+      - 02-step02
+      - 03-step03
+      - 04-step04
+      - 05-step05
+      - 06-step06
+      - 07-step07
+      - 08-step08
+      - 09-step09
+      - 10-step10
 
-  - name: "IdM Replica"
-    url: /wetty_idmreplica/ssh/root
+  - name: "idm2"
+    url: /wetty_idm2/ssh/root
     modules: 
-      - 08-replicainstall
+      - 08-step08
 
-  - name: "IdM Client1"
-    url: /wetty_idmclient1/ssh/root
+  - name: "client1"
+    url: /wetty_client1/ssh/root
     modules: 
       - 01-introduction
-      - 02-clientenrollment
-      - 03-usermanagement
-      - 04-hostbasedaccesscontrol
-      - 05-sudo
-      - 06-selinuxusermaps
-      - 07-sshkeymanagement
-      - 08-replicainstall
-      - 09-applicationauthz
-      - 10-certmanagement
-      - 11-vaultmanagement
+      - 02-step02
+      - 03-step03
+      - 04-step04
+      - 05-step05
+      - 06-step06
+      - 07-step07
+      - 08-step08
+      - 09-step09
+      - 10-step10
 
-  - name: "IdM Client2"
-    url: /wetty_idmclient2/ssh/root
+  - name: "client2"
+    url: /wetty_client2/ssh/root
     modules: 
-      - 09-applicationauthz
-      - 10-certmanagement
+      - 09-step09
+      - 10-step10
 
 
 # The url line uses the name of the *service* entry from the instance.yaml file
