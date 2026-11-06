@@ -1,1 +1,5 @@
 == Welcome to Module 6
+
+Modify templates
+Regenerate deployment
+Rerun the build

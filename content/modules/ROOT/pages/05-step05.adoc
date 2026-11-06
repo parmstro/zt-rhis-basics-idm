@@ -1,1 +1,4 @@
 == Welcome to Module 5
+
+Register clients
+Examine Build features

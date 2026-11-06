@@ -1,1 +1,4 @@
 == Welcome to Module 4
+
+Building the IdM Primary
+Examining the Build

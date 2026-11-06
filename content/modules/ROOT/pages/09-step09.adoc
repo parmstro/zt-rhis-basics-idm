@@ -1,1 +1,4 @@
 === Welcome to Module 9
+
+Deploy a Replica
+(Normally done after Satellite deploy)

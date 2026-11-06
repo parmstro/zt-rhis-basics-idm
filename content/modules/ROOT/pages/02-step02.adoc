@@ -1,2 +1,5 @@
 == Welcome to Module 2
 
+Understanding RHIS basevars file
+Understanding RHIS inventory_templates
+Generating a deployment.

@@ -1,1 +1,5 @@
 == Welcome to Module 7
+
+Modify templates
+Regenerate deployment
+Rerun a single role
