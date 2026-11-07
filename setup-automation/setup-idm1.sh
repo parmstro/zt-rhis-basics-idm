@@ -48,7 +48,7 @@ echo "192.168.0.30 $PROVISIONER_NAME" >> /etc/hosts
 
 echo "Setting the hostname" >> /root/post-run.log
 
-hostnamectl set-hostname idmprimary.example.local
+hostnamectl set-hostname idm1.example.local
 
 hostnamectl >> /run/post-run.log
 
@@ -110,8 +110,8 @@ tee -a /root/ipa-web.sh << EOF
 tee /etc/httpd/conf.d/ipa-rewrite.conf << IPA
 # VERSION 7 - DO NOT REMOVE THIS LINE
 
-RequestHeader set Host idmprimary.example.local
-RequestHeader set Referer https://idmprimary.example.local/ipa/ui/
+RequestHeader set Host idm1.example.local
+RequestHeader set Referer https://idm1.example.local/ipa/ui/
 RewriteEngine on
 
 # Rewrite for plugin index, make it like it's a static file

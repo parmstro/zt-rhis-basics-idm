@@ -48,7 +48,7 @@ echo "192.168.0.30 $PROVISIONER_NAME" >> /etc/hosts
 
 echo "Setting the hostname" >> /root/post-run.log
 
-hostnamectl set-hostname idmreplica.example.local
+hostnamectl set-hostname idm2.example.local
 nmcli conn mod "Wired connection 2" ipv4.addresses 192.168.0.11/24 ipv4.dns 192.168.0.10 ipv4.method manual connection.autoconnect yes
 nmcli conn up "Wired connection 2" 
 nmcli conn mod "Wired connection 1" ipv4.dns 192.168.0.10

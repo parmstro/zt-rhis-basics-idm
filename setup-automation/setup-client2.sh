@@ -53,7 +53,7 @@ echo "192.168.0.30 $PROVISIONER_NAME" >> /etc/hosts
 
 echo "Setting the hostname" >> /root/post-run.log
 
-hostnamectl set-hostname idmclient2.example.local
+hostnamectl set-hostname client2.example.local
 nmcli conn mod "Wired connection 2" ipv4.addresses 192.168.0.21/24 ipv4.dns 192.168.0.10 ipv4.method manual connection.autoconnect yes
 nmcli conn up "Wired connection 2" 
 nmcli conn mod "Wired connection 1" ipv4.dns 192.168.0.10
@@ -97,7 +97,7 @@ EOF
 
 sudo sh -c "cat >/etc/httpd/conf.d/app.conf" <<EOF
 <VirtualHost *:80>
-    ServerName idmclient2.example.local
+    ServerName client2.example.local
     WSGIScriptAlias / /usr/share/httpd/app.py
 
     <Directory /usr/share/httpd>
