@@ -1,29 +1,35 @@
 #!/bin/bash
 
+# Define the log file paths
+LOG_FILE="/root/post-run.log"
+
+# Redirect stdout and stderr into a tee process
+exec > >(tee -a "$LOG_FILE") 2>&1
+
 subscription-manager config --rhsm.manage_repos=1
 subscription-manager register --activationkey=${ACTIVATION_KEY} --org=12451665 --force
 
-echo "remove GCP repos" >> /root/post-run.log
+echo "remove GCP repos"
 mv /etc/yum.repos.d/google-cloud.repo /root
 
-echo "Adding rhel user" > /root/post-run.log
+echo "Adding rhel user"
 usermod -aG wheel rhel
 
-echo "setting password for rhel" >> /root/post-run.log
+echo "setting password for rhel"
 echo 'redhat' | passwd --stdin rhel
 
-echo "Adding ansiblerunner user" > /root/post-run.log
+echo "Adding ansiblerunner user"
 useradd -mG wheel ansiblerunner
 
-echo "setting password for ansiblerunner" >> /root/post-run.log
+echo "setting password for ansiblerunner"
 echo 'redhat' | passwd --stdin ansiblerunner
 
-echo "configuring ansiblerunner sudo privileges" >> /root/post-run.log
+echo "configuring ansiblerunner sudo privileges"
 cat << EOF > /etc/sudoers.d/ansiblerunner
 ansiblerunner ALL=(ALL) NOPASSWD: ALL
 EOF
 
-echo "adding ansible-core" >> /root/post-run.log
+echo "adding ansible-core"
 dnf install -y ansible-core bind-utils git
 
 myip="$(hostname -I | awk '{print $1}')"
@@ -48,11 +54,9 @@ echo "192.168.0.20 $IDM_CLIENT1_NAME" >> /etc/hosts
 echo "192.168.0.21 $IDM_CLIENT2_NAME" >> /etc/hosts
 echo "192.168.0.30 $PROVISIONER_NAME" >> /etc/hosts
 
-echo "Setting the hostname" >> /root/post-run.log
+echo "Setting the hostname"
 
 hostnamectl set-hostname provisioner.example.local
-
-hostnamectl >> /run/post-run.log
 
 nmcli conn mod "Wired connection 2" ipv4.addresses 192.168.0.30/24 ipv4.dns 192.168.0.10 ipv4.method manual connection.autoconnect yes
 nmcli conn up "Wired connection 2" 
@@ -116,10 +120,11 @@ chown "${LAB_USER}:${LAB_USER}" "${VSCODE_USER_DIR}/settings.json"
 chmod 0600 "${VSCODE_USER_DIR}/settings.json"
 
 # Keep the user service alive after the provisioning connection closes.
-chown -R "${LAB_USER}:${LAB_USER}" "/home/${LAB_USER}"
-systemctl --user -M "${LAB_USER}@" enable code-server.service
-systemctl --user -M "${LAB_USER}@" restart code-server.service
-systemctl --user -M "${LAB_USER}@" status code-server.service
+loginctl enable-linger "${LAB_USER}"
+sudo chown -R "${LAB_USER}:${LAB_USER}" "/home/${LAB_USER}"
+sudo systemctl --user -M "${LAB_USER}@" enable code-server.service
+sudo systemctl --user -M "${LAB_USER}@" restart code-server.service
+sudo systemctl --user -M "${LAB_USER}@" status code-server.service
 
 echo "code-server is listening on host1 TCP/8080 with ${WORKSPACE} ready to open."
 echo "A CNV route or proxy is still required before the Showroom browser tab can reach it."

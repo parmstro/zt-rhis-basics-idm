@@ -1,26 +1,30 @@
 #!/bin/bash
 
-echo "testing"
+# Define the log file paths
+LOG_FILE="/root/post-run.log"
+
+# Redirect stdout and stderr into a tee process
+exec > >(tee -a "$LOG_FILE") 2>&1
 
 subscription-manager config --rhsm.manage_repos=1
 subscription-manager register --activationkey=${ACTIVATION_KEY} --org=12451665 --force
 
-echo "remove GCP repos" >> /root/post-run.log
+echo "remove GCP repos"
 mv /etc/yum.repos.d/google-cloud.repo /root
 
-echo "Adding rhel user" > /root/post-run.log
+echo "Adding rhel user"
 usermod -aG wheel rhel
 
-echo "setting password for rhel" >> /root/post-run.log
+echo "setting password for rhel"
 echo 'redhat' | passwd --stdin rhel
 
-echo "Adding ansiblerunner user" > /root/post-run.log
+echo "Adding ansiblerunner user"
 useradd -mG wheel ansiblerunner
 
-echo "setting password for ansiblerunner" >> /root/post-run.log
+echo "setting password for ansiblerunner"
 echo 'redhat' | passwd --stdin ansiblerunner
 
-echo "configuring ansiblerunner sudo privileges" >> /root/post-run.log
+echo "configuring ansiblerunner sudo privileges"
 cat << EOF > /etc/sudoers.d/ansiblerunner
 ansiblerunner ALL=(ALL) NOPASSWD: ALL
 EOF
@@ -55,9 +59,11 @@ echo "192.168.0.20 $IDM_CLIENT1_NAME" >> /etc/hosts
 echo "192.168.0.21 $IDM_CLIENT2_NAME" >> /etc/hosts
 echo "192.168.0.30 $PROVISIONER_NAME" >> /etc/hosts
 
-echo "Setting the hostname" >> /root/post-run.log
+echo "Setting the hostname"
 
 hostnamectl set-hostname client2.example.local
+hostnamtctl
+
 nmcli conn mod "Wired connection 2" ipv4.addresses 192.168.0.21/24 ipv4.dns 192.168.0.10 ipv4.method manual connection.autoconnect yes
 nmcli conn up "Wired connection 2" 
 nmcli conn mod "Wired connection 1" ipv4.dns 192.168.0.10
@@ -69,13 +75,13 @@ echo "Origins = https://cockpit-${GUID}.${DOMAIN}" >> /etc/cockpit/cockpit.conf
 echo "AllowUnencrypted = true" >> /etc/cockpit/cockpit.conf
 systemctl enable --now cockpit.socket
 
-echo "enable bash completion in the root's shell" >> /root/post-run.log
+echo "enable bash completion in the root's shell"
 echo "source /etc/profile.d/bash_completion.sh" >> /root/.bashrc
 
-echo "Install the ipa-client packages and lab packages" >> /root/post-run.log
+echo "Install the ipa-client packages and lab packages"
 dnf -y install firewalld bind-utils net-tools sssd-dbus vim nano ipa-client httpd mod_lookup_identity mod_authnz_pam mod_wsgi haveged nmap-ncat pamtester bash-completion
 
-echo "Configure the firewall for httpd" >> /root/post-run.log
+echo "Configure the firewall for httpd"
 systemctl enable --now firewalld
 firewall-cmd --permanent --add-service http
 firewall-cmd --reload
@@ -112,7 +118,7 @@ sudo sh -c "cat >/etc/httpd/conf.d/app.conf" <<EOF
 </VirtualHost>
 EOF
 
-echo "Set the timezone" >> /root/post-run.log
+echo "Set the timezone"
 timedatectl set-timezone America/Toronto
 
-echo "DONE" >> /root/post-run.log
+echo "DONE"

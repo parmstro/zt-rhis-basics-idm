@@ -1,26 +1,30 @@
 #!/bin/bash
 
-echo "testing"
+# Define the log file paths
+LOG_FILE="/root/post-run.log"
+
+# Redirect stdout and stderr into a tee process
+exec > >(tee -a "$LOG_FILE") 2>&1
 
 subscription-manager config --rhsm.manage_repos=1
 subscription-manager register --activationkey=${ACTIVATION_KEY} --org=12451665 --force
 
-echo "remove GCP repos" >> /root/post-run.log
+echo "remove GCP repos"
 mv /etc/yum.repos.d/google-cloud.repo /root
 
-echo "Adding rhel user" > /root/post-run.log
+echo "Adding rhel user"
 usermod -aG wheel rhel
 
-echo "setting password for rhel" >> /root/post-run.log
+echo "setting password for rhel"
 echo 'redhat' | passwd --stdin rhel
 
-echo "Adding ansiblerunner user" > /root/post-run.log
+echo "Adding ansiblerunner user"
 useradd -mG wheel ansiblerunner
 
-echo "setting password for ansiblerunner" >> /root/post-run.log
+echo "setting password for ansiblerunner"
 echo 'redhat' | passwd --stdin ansiblerunner
 
-echo "configuring ansiblerunner sudo privileges" >> /root/post-run.log
+echo "configuring ansiblerunner sudo privileges"
 cat << EOF > /etc/sudoers.d/ansiblerunner
 ansiblerunner ALL=(ALL) NOPASSWD: ALL
 EOF
@@ -50,22 +54,24 @@ echo "192.168.0.20 $IDM_CLIENT1_NAME" >> /etc/hosts
 echo "192.168.0.21 $IDM_CLIENT2_NAME" >> /etc/hosts
 echo "192.168.0.30 $PROVISIONER_NAME" >> /etc/hosts
 
-echo "Setting the hostname" >> /root/post-run.log
+echo "Setting the hostname"
 
 hostnamectl set-hostname idm2.example.local
+hostnamectl
+
 nmcli conn mod "Wired connection 2" ipv4.addresses 192.168.0.11/24 ipv4.dns 192.168.0.10 ipv4.method manual connection.autoconnect yes
 nmcli conn up "Wired connection 2" 
 nmcli conn mod "Wired connection 1" ipv4.dns 192.168.0.10
 nmcli conn up "Wired connection 1" 
 
 # rhel user is already part of wheel
-echo "enable bash completion in the root's shell" >> /root/post-run.log
+echo "enable bash completion in the root's shell"
 echo "source /etc/profile.d/bash_completion.sh" >> /root/.bashrc
 
-echo "Install the ipa-server packages" >> /root/post-run.log
+echo "Install the ipa-server packages"
 dnf -y install ipa-server ipa-server-dns ipa-healthcheck firewalld net-tools
 
-echo "Configure the firewall for IdM Server" >> /root/post-run.log
+echo "Configure the firewall for IdM Server"
 systemctl enable --now firewalld
 firewall-cmd --permanent --add-service=dns
 firewall-cmd --permanent --add-service=http  # redundant really
@@ -99,7 +105,7 @@ EOF
 
 chmod +x /root/trustednetwork.sh
 
-echo "Set the timezone" >> /root/post-run.log
+echo "Set the timezone"
 timedatectl set-timezone America/Toronto
 
-echo "DONE" >> /root/post-run.log
+echo "DONE"

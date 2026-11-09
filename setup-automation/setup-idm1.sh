@@ -1,26 +1,30 @@
 #!/bin/bash
 
-echo "testing"
+# Define the log file paths
+LOG_FILE="/root/post-run.log"
+
+# Redirect stdout and stderr into a tee process
+exec > >(tee -a "$LOG_FILE") 2>&1
 
 subscription-manager config --rhsm.manage_repos=1
 subscription-manager register --activationkey=${ACTIVATION_KEY} --org=12451665 --force
 
-echo "remove GCP repos" >> /root/post-run.log
+echo "remove GCP repos"
 mv /etc/yum.repos.d/google-cloud.repo /root
 
-echo "Adding rhel user" > /root/post-run.log
+echo "Adding rhel user"
 usermod -aG wheel rhel
 
-echo "setting password for rhel" >> /root/post-run.log
+echo "setting password for rhel"
 echo 'redhat' | passwd --stdin rhel
 
-echo "Adding ansiblerunner user" > /root/post-run.log
+echo "Adding ansiblerunner user"
 useradd -mG wheel ansiblerunner
 
-echo "setting password for ansiblerunner" >> /root/post-run.log
+echo "setting password for ansiblerunner"
 echo 'redhat' | passwd --stdin ansiblerunner
 
-echo "configuring ansiblerunner sudo privileges" >> /root/post-run.log
+echo "configuring ansiblerunner sudo privileges"
 cat << EOF > /etc/sudoers.d/ansiblerunner
 ansiblerunner ALL=(ALL) NOPASSWD: ALL
 EOF
@@ -50,17 +54,16 @@ echo "192.168.0.20 $IDM_CLIENT1_NAME" >> /etc/hosts
 echo "192.168.0.21 $IDM_CLIENT2_NAME" >> /etc/hosts
 echo "192.168.0.30 $PROVISIONER_NAME" >> /etc/hosts
 
-echo "Setting the hostname" >> /root/post-run.log
+echo "Setting the hostname"
 
 hostnamectl set-hostname idm1.example.local
-
-hostnamectl >> /run/post-run.log
+hostnamectl
 
 nmcli conn mod "Wired connection 2" ipv4.addresses 192.168.0.10/24 ipv4.method manual connection.autoconnect yes
 nmcli conn up "Wired connection 2" 
 
 # rhel user is already part of wheel
-echo "enable bash completion in the root's shell" >> /root/post-run.log
+echo "enable bash completion in the root's shell"
 echo "source /etc/profile.d/bash_completion.sh" >> /root/.bashrc
 
 echo "Install the ipa-server packages" >> /root/post-run.log
@@ -106,9 +109,6 @@ EOF
 
 chmod +x /root/trustednetwork.sh
 
-echo "Set the timezone" >> /root/post-run.log
-timedatectl set-timezone America/Toronto
-
 tee -a /root/ipa-web.sh << EOF
 #!/bin/bash
 tee /etc/httpd/conf.d/ipa-rewrite.conf << IPA
@@ -127,6 +127,10 @@ RewriteCond %{REQUEST_URI}  !^/(ca|kra|pki|acme)
 IPA
 systemctl reload httpd
 EOF
+
 chmod +x /root/ipa-web.sh
 
-echo "DONE" >> /root/post-run.log
+echo "Set the timezone"
+timedatectl set-timezone America/Toronto
+
+echo "DONE"
