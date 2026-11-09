@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-14 0 564 415" width="564" height="415" font-family="IBM Plex Sans, system-ui, -apple-system, Segoe UI, sans-serif" role="img"
+     aria-label="The provisioner node at 192.168.0.30 manages the lab environment, shown by dashed manage lines routed down the left margin with stubs entering both the IdM servers section and the enrolled clients section. Two IdM servers sit in the upper band: idm1, the primary at 192.168.0.10, and idm2, the replica at 192.168.0.11. Both carry chain icons showing they replicate, connected by a solid replicate arrow. Each server runs three colour-coded services: Kerberos KDC in blue, Dogtag CA in amber, and BIND DNS in magenta. Solid serve arrows descend from each server to the enrolled clients section below. Two clients, client1 at 192.168.0.20 and client2 at 192.168.0.21, receive identity services. All five systems share the secondary network at 192.168.0.0/24. The legend shows solid arrows for content, dashed arrows for settings, and chain icons for replication.">
+
+<!-- ===== BEGIN PASCAL HEAD (verbatim from assets/pascal-head.svg) ===== -->
+<style>
+  :root {
+    --bg: #f2f2f2;
+    --fg: #151515;
+    --muted: #4d4d4d;
+    --line: #c7c7c7;
+    --box: #ffffff;
+    --band: #e0e0e0;
+    --accent: #ee0000;
+    --accent-soft: #fce3e3;
+    --dev: #0066cc;
+    --bld: #f5921b;
+    --prd: #5e40be;
+    --lib: #37a3a3;
+    --font: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #151515;
+      --fg: #e0e0e0;
+      --muted: #a3a3a3;
+      --line: #383838;
+      --box: #292929;
+      --band: #1f1f1f;
+      --accent: #f56e6e;
+      --accent-soft: #3f0000;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #151515;
+    --fg: #e0e0e0;
+    --muted: #a3a3a3;
+    --line: #383838;
+    --box: #292929;
+    --band: #1f1f1f;
+    --accent: #f56e6e;
+    --accent-soft: #3f0000;
+    color-scheme: dark;
+  }
+
+  svg { background: var(--bg); }
+  .band { fill: var(--band); }
+  .box { fill: var(--box); stroke: var(--line); stroke-width: 1.25; }
+  .hc { fill: var(--band); stroke: var(--line); stroke-width: 1.25; }
+  .chip { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1; }
+  .env-lib { fill: color-mix(in srgb, var(--lib) 22%, var(--box)); stroke: var(--lib); stroke-width: 2; }
+  .env-dev { fill: color-mix(in srgb, var(--dev) 20%, var(--box)); stroke: var(--dev); stroke-width: 2; }
+  .env-bld { fill: color-mix(in srgb, var(--bld) 20%, var(--box)); stroke: var(--bld); stroke-width: 2; }
+  .env-prd { fill: color-mix(in srgb, var(--prd) 20%, var(--box)); stroke: var(--prd); stroke-width: 2; }
+  .clk { fill: none; stroke: var(--fg); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .sheet { fill: var(--box); stroke: var(--line); stroke-width: 1.5; stroke-linejoin: round; }
+  .rule { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .lk { fill: none; stroke: var(--accent); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+  .ky { fill: none; stroke: var(--muted); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+  .t { fill: var(--fg); font-size: 13px; }
+  .tb { fill: var(--fg); font-size: 13px; font-weight: 600; }
+  .tm { fill: var(--muted); font-size: 12px; }
+  .tc { fill: var(--fg); font-size: 12px; font-weight: 500; }
+  .tv { fill: var(--accent); font-size: 12.5px; font-weight: 600; }
+  .cap { fill: var(--muted); font-size: 10.5px; letter-spacing: .09em; font-weight: 600; text-transform: uppercase; }
+  .arr { fill: none; stroke: var(--accent); stroke-width: 2; marker-end: url(#ah); }
+  .arr-s { fill: none; stroke: var(--accent); stroke-width: 1.5; marker-end: url(#ah); }
+  .cfg { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 5 4; marker-end: url(#ahc); }
+  .ah { fill: var(--accent); }
+  .ahc { fill: var(--muted); }
+</style>
+<defs>
+  <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto">
+    <path class="ah" d="M0 0 L10 5 L0 10 z"/>
+  </marker>
+  <marker id="ahc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto">
+    <path class="ahc" d="M0 0 L10 5 L0 10 z"/>
+  </marker>
+  <symbol id="link" viewBox="0 0 24 24">
+    <path class="lk" d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+    <path class="lk" d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+  </symbol>
+</defs>
+<!-- ===== END PASCAL HEAD ===== -->
+
+  <!-- Provisioner: the management node that deploys and orchestrates the entire lab via ansible and the rhis-container -->
+  <rect class="box" x="130" y="10" width="200" height="52" rx="6"/>
+  <text class="tb" x="230" y="32" text-anchor="middle">Provisioner</text>
+  <text class="tm" x="230" y="48" text-anchor="middle">192.168.0.30</text>
+
+  <!-- IdM servers: the two replicating identity servers that provide KDC, CA, and DNS services to the domain -->
+  <text class="cap" x="20" y="92">IdM servers</text>
+  <rect class="band" x="20" y="100" width="440" height="110" rx="8"/>
+
+  <rect class="box" x="33" y="112" width="170" height="88" rx="6"/>
+  <use href="#link" x="47" y="116" width="14" height="14"/>
+  <text class="tb" x="67" y="130">idm1</text>
+  <text class="tm" x="67" y="146">Primary</text>
+  <text class="tm" x="67" y="160">192.168.0.10</text>
+  <rect class="box env-dev" x="46" y="170" width="44" height="18" rx="3"/>
+  <text class="tc" x="68" y="182" text-anchor="middle" style="font-size:11px">KDC</text>
+  <rect class="box env-bld" x="96" y="170" width="34" height="18" rx="3"/>
+  <text class="tc" x="113" y="182" text-anchor="middle" style="font-size:11px">CA</text>
+  <rect class="box env-prd" x="136" y="170" width="44" height="18" rx="3"/>
+  <text class="tc" x="158" y="182" text-anchor="middle" style="font-size:11px">DNS</text>
+
+  <rect class="box" x="277" y="112" width="170" height="88" rx="6"/>
+  <use href="#link" x="291" y="116" width="14" height="14"/>
+  <text class="tb" x="311" y="130">idm2</text>
+  <text class="tm" x="311" y="146">Replica</text>
+  <text class="tm" x="311" y="160">192.168.0.11</text>
+  <rect class="box env-dev" x="290" y="170" width="44" height="18" rx="3"/>
+  <text class="tc" x="312" y="182" text-anchor="middle" style="font-size:11px">KDC</text>
+  <rect class="box env-bld" x="340" y="170" width="34" height="18" rx="3"/>
+  <text class="tc" x="357" y="182" text-anchor="middle" style="font-size:11px">CA</text>
+  <rect class="box env-prd" x="380" y="170" width="44" height="18" rx="3"/>
+  <text class="tc" x="402" y="182" text-anchor="middle" style="font-size:11px">DNS</text>
+
+  <!-- Enrolled clients: machines that join the IdM domain and consume identity services -->
+  <text class="cap" x="20" y="248">Enrolled clients</text>
+  <rect class="band" x="20" y="256" width="440" height="68" rx="8"/>
+
+  <rect class="box" x="33" y="266" width="170" height="46" rx="6"/>
+  <text class="tb" x="118" y="284" text-anchor="middle">client1</text>
+  <text class="tm" x="118" y="300" text-anchor="middle">192.168.0.20</text>
+
+  <rect class="box" x="277" y="266" width="170" height="46" rx="6"/>
+  <text class="tb" x="362" y="284" text-anchor="middle">client2</text>
+  <text class="tm" x="362" y="300" text-anchor="middle">192.168.0.21</text>
+
+  <!-- Network: the private subnet connecting all five lab systems -->
+  <text class="cap" x="240" y="350" text-anchor="middle">Secondary network</text>
+  <text class="tm" x="240" y="366" text-anchor="middle">192.168.0.0/24</text>
+
+  <!-- Legend: only the idioms this diagram uses -->
+  <path class="arr-s" d="M30 394 H62"/>
+  <text class="tm" x="70" y="398">content</text>
+  <path class="cfg" d="M148 394 H180"/>
+  <text class="tm" x="188" y="398">settings</text>
+  <use href="#link" x="263" y="387" width="14" height="14"/>
+  <text class="tm" x="285" y="398">replicates</text>
+
+  <!-- DRAWN LAST: arrows whose heads land on bands or boxes, painted after them so arrowheads stay visible -->
+
+  <!-- manage: provisioner deploys and configures all nodes, routed down the left margin -->
+  <path class="cfg" style="marker-end:none; stroke-linejoin:round" d="M130 36 H8"/>
+  <path class="cfg" style="marker-end:none" d="M8 36 V310"/>
+  <path class="cfg" d="M8 158 H20"/>
+  <path class="cfg" d="M8 290 H20"/>
+  <text class="tm" x="14" y="225">manage</text>
+
+  <!-- replicate: identity data is synchronised between the primary and the replica -->
+  <path class="arr-s" d="M203 155 H277"/>
+  <text class="tv" x="240" y="143" text-anchor="middle" style="font-size:11px">replicate</text>
+
+  <!-- serve: IdM servers deliver identity services to enrolled clients -->
+  <path class="arr" d="M118 210 V256"/>
+  <text class="tv" x="130" y="236">serve</text>
+  <path class="arr" d="M362 210 V256"/>
+  <text class="tv" x="374" y="236">serve</text>
+
+</svg>

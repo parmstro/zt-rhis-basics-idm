@@ -289,11 +289,9 @@ Authorization services are controlled by the underlying LDAP implementation (389
 Domain Name Services are provided through bind.
 Certificate Serivces are provide via the integrated CA (dogtag).
 
-
 IdM can also provide integration with external core identity services like Microsoft Active Directory, EntraID, Octa and other OAuth2 / OIDC compliant services.
 IdM is able to centralize these identities and then apply appropriate authorization policy across them so that the policy is consumable by hosts that register to IdM.
 Active Directory integration is limited to those hosts that support SSSD. 
-
 
 There are some caveats the come along with Red Hat IdM implementation. 
 The most important is that because IdM uses Kerberos authentication IdM servers need to exist in their own DNS domain (or subdomain). 

@@ -1,5 +1,44 @@
 == Welcome to Module 2
 
-Understanding RHIS basevars file
+=== Understanding rhis-builder-inventory and deployments
+
+**The rhis-builder-inventory**
+
+The rhis-builder-inventory repository in github defines the structure and default configuration for an RHIS environment.
+We make a disconnected copy of this repository for managing your own environments.
+The repository contains a reference architecture for an idealized deployment of a Red Hat Infrastructure.
+You are free to modify this in any way that you please. 
+The goal of the reference architecture is to show you how the products were intended to work together to manage your environment.
+The repository contains only configuration data (as tempates) and a small set of ansible plays to manipulate the configuation templates.
+All of the code that builds and configures your environment based on the data resides in the rhis-provisioner container.
+The container reads the configuration and applies it to your lab environment.
+
+**Deployments**
+
+RHIS has the notion of Deployments.
+A deployment defines the DNS domain and the Red Hat Enterprise Linux servers that will support it.
+A deployment typically consists of the following RHEL servers:
+  - an Identity Management server
+  - a Satellite server
+  - an Ansible Automation Platform server
+In this lab we will only be creating the Identity Management server.
+
+A deployment is identified at a high level by the **inventory_basevars** file.
+This is a configuration definition file written in YAML that defines the high level template variables used to create a deployment.
+The deployment itself is managed through the directories of configuration files under **inventory_templates**
+
+
+=== Understanding RHIS inventory_basevars.yml file
+
+To create a deployment, we first make a copy of the sample inventory_basevars.yml file.
+The recommended practice is to name this after your DNS domain that you will be managing.
+
+```
+cp /rhis/rhis-builder-inventory/inventory_basevars.yml /rhis/rhis-builder-inventory/example.com_inventory_basevars.yml
+```
+
+We will examine the new example.com_inventory_basevars.yml file a section at a time.
+
+
 Understanding RHIS inventory_templates
 Generating a deployment.
