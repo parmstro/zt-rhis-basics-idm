@@ -8,13 +8,17 @@ subscription-manager register --activationkey=${ACTIVATION_KEY} --org=12451665 -
 echo "remove GCP repos" >> /root/post-run.log
 mv /etc/yum.repos.d/google-cloud.repo /root
 
-echo "Adding wheel" > /root/post-run.log
+echo "Adding rhel user" > /root/post-run.log
 usermod -aG wheel rhel
-usermod -aG wheel ansiblerunner
 
-echo "setting password" >> /root/post-run.log
-echo redhat | passwd --stdin rhel
-echo redhat | passwd --stdin ansiblerunner
+echo "setting password for rhel" >> /root/post-run.log
+echo 'redhat' | passwd --stdin rhel
+
+echo "Adding ansiblerunner user" > /root/post-run.log
+useradd -mG wheel ansiblerunner
+
+echo "setting password for ansiblerunner" >> /root/post-run.log
+echo 'redhat' | passwd --stdin ansiblerunner
 
 echo "configuring ansiblerunner sudo privileges" >> /root/post-run.log
 cat << EOF > /etc/sudoers.d/ansiblerunner

@@ -6,14 +6,17 @@ subscription-manager register --activationkey=${ACTIVATION_KEY} --org=12451665 -
 echo "remove GCP repos" >> /root/post-run.log
 mv /etc/yum.repos.d/google-cloud.repo /root
 
-echo "Adding wheel" > /root/post-run.log
+echo "Adding rhel user" > /root/post-run.log
 usermod -aG wheel rhel
-usermod -aG wheel ansiblerunner
 
-echo "setting password" >> /root/post-run.log
-ssh_password=`openssl rand -base64 8`
-echo $ssh_password | passwd --stdin rhel
-echo $ssh_password | passwd --stdin ansiblerunner
+echo "setting password for rhel" >> /root/post-run.log
+echo 'redhat' | passwd --stdin rhel
+
+echo "Adding ansiblerunner user" > /root/post-run.log
+useradd -mG wheel ansiblerunner
+
+echo "setting password for ansiblerunner" >> /root/post-run.log
+echo 'redhat' | passwd --stdin ansiblerunner
 
 echo "configuring ansiblerunner sudo privileges" >> /root/post-run.log
 cat << EOF > /etc/sudoers.d/ansiblerunner
@@ -58,7 +61,7 @@ nmcli conn up "Wired connection 1"
 
 # VSCode Server deployment
 CODE_SERVER_VERSION="${CODE_SERVER_VERSION:-4.138.0}"
-CODE_SERVER_PASSWORD=$ssh_password
+CODE_SERVER_PASSWORD="redhat"
 LAB_USER="ansiblerunner"
 LAB_HOME="/home/${LAB_USER}"
 WORKSPACE="${LAB_HOME}/rhis"
@@ -113,9 +116,10 @@ chown "${LAB_USER}:${LAB_USER}" "${VSCODE_USER_DIR}/settings.json"
 chmod 0600 "${VSCODE_USER_DIR}/settings.json"
 
 # Keep the user service alive after the provisioning connection closes.
-systemctl enable --now code-server
-systemctl restart code-server
-systemctl --no-pager --full status code-server
+chown -R "${LAB_USER}:${LAB_USER}" "/home/${LAB_USER}"
+systemctl --user -M "${LAB_USER}@" enable code-server.service
+systemctl --user -M "${LAB_USER}@" restart code-server.service
+systemctl --user -M "${LAB_USER}@" status code-server.service
 
 echo "code-server is listening on host1 TCP/8080 with ${WORKSPACE} ready to open."
 echo "A CNV route or proxy is still required before the Showroom browser tab can reach it."
