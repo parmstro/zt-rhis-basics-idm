@@ -39,6 +39,73 @@ cp /rhis/rhis-builder-inventory/inventory_basevars.yml /rhis/rhis-builder-invent
 
 We will examine the new example.com_inventory_basevars.yml file a section at a time.
 
+Let's start. Most of these are self explanatory.
+
+```
+# GLOBAL VARIABLES THAT APPLY TO ALL HOSTS
+basevars_global_domain_name: "savage.test"
+basevars_delete_logs: false       # Set to true to wipe the logs directory on inventory_update
+
+# Deployment relationship
+# Set basevars_disconnected_domain: true for air-gapped/highside deployments
+# Set basevars_upstream_connected_deployment to the list of connected domains that feed content here
+# Set basevars_downstream_disconnected_deployment to the list of air-gapped domains this deployment feeds
+basevars_disconnected_domain: false
+# basevars_upstream_connected_deployment:
+#   - ""
+# basevars_downstream_disconnected_deployment:
+#   - ""
+```
+
+basevars_global_domain_name sets the domain name for all systems within the deployment. 
+You will see in the inventory that we define server roles by shortname. 
+When we deploy, the standard is <shortname><#>.<basevars_global_domain_name>
+e.g. idm1.example.com
+
+Next, is
+
+basevars_disconnected_domain: false
+
+We always need to create a connected environment first.
+We can reference an existing connected environment, however, it must have a properly configured satellite instance.
+
+The next section is fairly straightforward as well.
+
+```
+default_network: "192.168.140.0"
+default_network_prefix: "22"
+default_network_mask: "255.255.252.0"
+
+default_bond_network: "192.168.142.0"
+default_bond_network_prefix: "22"
+default_bond_network_mask: "255.255.252.0"
+
+rhis_primary_city: "Greenville"
+rhis_primary_state: "South Carolina"
+rhis_timezone: "America/New_York"
+rhis_locale: "en"
+
+rhis_time_servers:
+  - "0.rhel.pool.ntp.org"
+  - "1.rhel.pool.ntp.org"
+  - "2.rhel.pool.ntp.org"
+  - "3.rhel.pool.ntp.org"
+```
+
+The default_network and related variables define the network that your core rhis systems will exist in. 
+This is for your idm primary and replica systems, your satellite and ansible automation platform node.
+For this environment you can ignore bonded networks - this is for deploying bonded systems from satellite.
+The rhis_primary_city, state, timezone and locale are only used in deploying users accounts to ease deployment for a single location.
+As we are deploying kerberos, rhis_time_servers defines the time servers necessary to keep IdM aligned.
+
+**NOTE:** You can extend the basevars implementation to suite your own environment.
+This is one of the reasons we are making a copy of the repo vs. cloning.
+
+**ATTENTION:** In this implementation of RHIS, as upstream templates change, merging newer features with customized configuration is manual.
+We are in the process of implementing a tailoring files solution so that you can isolate your changes and extensions.
+This will eventually allow you to consume all upstream changes without impacting your customizations.
+
+
 
 Understanding RHIS inventory_templates
 Generating a deployment.
