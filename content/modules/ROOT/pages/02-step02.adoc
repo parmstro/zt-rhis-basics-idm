@@ -105,7 +105,126 @@ This is one of the reasons we are making a copy of the repo vs. cloning.
 We are in the process of implementing a tailoring files solution so that you can isolate your changes and extensions.
 This will eventually allow you to consume all upstream changes without impacting your customizations.
 
+The next section is important for automating system deployment.
+
+```
+basevars_default_baremetal_boot_disk: "/dev/nvme0n1"
+basevars_default_baremetal_root_disk: "/dev/nvme0n1"
+basevars_default_virtual_boot_disk: "/dev/sda"
+basevars_default_virtual_root_disk: "/dev/sda"
+# basevars_default_virtual_boot_disk: "/dev/vda"   # e.g. for KVM deployments
+# basevars_default_virtual_root_disk: "/dev/vda"
+
+rhis_aap_release_version: "2.6"
+rhis_satellite_release_version: "6.19"
+rhis_satellite_os_major_version: "9"
+```
+These variables define the defaults for baremetal and virtual system builds for the bootdisk and rootdisk.
+This make provisioning steup in Satellite easier.
+Remember that you can always override these at buildtime/runtime.
+
+The rhis_ variables set our default deployment versions.
+These are what systems will get built for AAP and Satellite.
+We use RHEL9 for everything by default as Satellite only supports deployment on RHEL9. 
+When Satellite supports RHEL10, everything will move to RHEL10.
+
+The last section we will discuss is the RHIS system counts:
+
+```
+rhis_system_count:
+  satellite: 1
+  capsule: 1
+  idm: 2
+  gitea: 0
+  logserver: 0
+  aapgateway: 0
+  aapcontroller: 1
+  aapedacontroller: 0
+  aaphub: 0
+  aapdatabase: 0
+  aapexecution: 0
+  aaphop: 0
+  kvm_hypervisors: 0
+  quadlet: 2
+  quay: 0
+  ```
+
+This list defines the different RHIS system roles we can deploy.
+This list is extensible.
+The list defines the number of systems of each type you want to add to your deployment.
+There are limits. 
+The limits for each server type are listed in inventory_basevars_limits.yml.
+Exceeding a limit will generate and error on inventory update.
+The default counts for a test environment are presented above.
+We will only be deploying an IdM primary and replica, so when we edit ours, all values will be zero except idm which will be 2.
+
+You created a copy earlier. Now edit the file example.com_inventory_basevars.yml now and make these changes:
+
+```
+# GLOBAL VARIABLES THAT APPLY TO ALL HOSTS
+basevars_global_domain_name: "example.com"
+```
+
+```
+default_network: "192.168.0.0"
+default_network_prefix: "24"
+default_network_mask: "255.255.255.0"
+```
+
+Set these values to your home town or something familiar
+```
+rhis_primary_city: "Hespeler"
+rhis_primary_state: "Ontario"
+rhis_timezone: "America/Toronto"
+rhis_locale: "en"
+```
+
+Make sure that you only add 2 IdM servers to your deployment.
+```
+rhis_system_count:
+  satellite: 0
+  capsule: 0
+  idm: 2
+  gitea: 0
+  logserver: 0
+  aapgateway: 0
+  aapcontroller: 0
+  aapedacontroller: 0
+  aaphub: 0
+  aapdatabase: 0
+  aapexecution: 0
+  aaphop: 0
+  kvm_hypervisors: 0
+  quadlet: 0
+  quay: 0
+  ```
+
+=== Understanding RHIS inventory_templates
+
+Examine the files under the inventory_templates directory.
+Do not modify any of the files at this time.
+You will see that the inventory_templates directory is layed out like a standard ansible inventory directory.
+We have all the recommended directories that you would expect.
+Under **inventory_templates/host_vars/idm** you will find all the files that we will copy to generate our idm deployment.
+You can examine these now.
+
+**These are the files that you will eventually edit.**
+
+**We try to never edit the deployment files directly.**
+
+We may do this to quickly test something while debugging, but we want to make sure that we edit our templates and regenerate the deployment.
+The templates are our source of truth.
+The deployment is always generated and meant to be overwritten.
 
 
-Understanding RHIS inventory_templates
-Generating a deployment.
+=== Generating a deployment.
+
+Let's generate the first deployment.
+Now that you have editted your example.com_inventory_basevars.yml file we will use the inventory_update.sh helper script to launch our playbooks to create the deployment.
+On the provisioner or the terminal window in vscode. Run the following commands.
+
+```
+cd /home/ansiblerunner/rhis/rhis-builder-inventory
+./inventory_update.sh
+```
+
