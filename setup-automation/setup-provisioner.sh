@@ -11,8 +11,9 @@ usermod -aG wheel rhel
 usermod -aG wheel ansiblerunner
 
 echo "setting password" >> /root/post-run.log
-echo redhat | passwd --stdin rhel
-echo redhat | passwd --stdin ansiblerunner
+ssh_password=`openssl rand -base64 8`
+echo $ssh_password | passwd --stdin rhel
+echo $ssh_password | passwd --stdin ansiblerunner
 
 echo "configuring ansiblerunner sudo privileges" >> /root/post-run.log
 cat << EOF > /etc/sudoers.d/ansiblerunner
@@ -24,7 +25,6 @@ dnf install -y ansible-core bind-utils git
 
 myip="$(hostname -I | awk '{print $1}')"
 agent variable set MY_IP $myip
-ssh_password=`openssl rand -base64 8`
 agent variable set SSH_PASSWORD $ssh_password
 
 agent variable set SHORTNAME $_SANDBOX_ID

@@ -22,6 +22,8 @@ ingress:
         port: 9090
       - protocol: TCP
         port: 443
+      - protocol: TCP
+        port: 22
   - from:
       - podSelector:
           matchLabels:

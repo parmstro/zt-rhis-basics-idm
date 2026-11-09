@@ -35,6 +35,20 @@ antora:
       solveButton: false
 
 tabs:
+  - name: "provisioner"
+    url: /wetty_provisioner/ssh/ansiblerunner
+    modules: 
+      - 01-introduction
+      - 02-step02
+      - 03-step03
+      - 04-step04
+      - 05-step05
+      - 06-step06
+      - 07-step07
+      - 08-step08
+      - 09-step09
+      - 10-step10
+
   - name: "idm1"
     url: /wetty_idm1/ssh/root
     modules: 
