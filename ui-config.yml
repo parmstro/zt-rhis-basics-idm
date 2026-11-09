@@ -35,6 +35,9 @@ antora:
       solveButton: false
 
 tabs:
+  - name: VSCode Editor
+    url: https://vscode-${guid}.${domain}/?folder=/home/ansiblerunner/rhis/
+    
   - name: "provisioner"
     url: /wetty_provisioner/ssh/ansiblerunner
     modules: 

@@ -19,11 +19,11 @@ egress:
 ingress:
   - ports:
       - protocol: TCP
+        port: 8080
+      - protocol: TCP
         port: 9090
       - protocol: TCP
         port: 443
-      - protocol: TCP
-        port: 22
   - from:
       - podSelector:
           matchLabels:

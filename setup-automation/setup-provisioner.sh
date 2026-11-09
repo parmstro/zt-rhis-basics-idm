@@ -56,3 +56,66 @@ nmcli conn up "Wired connection 2"
 nmcli conn mod "Wired connection 1" ipv4.dns 192.168.0.10
 nmcli conn up "Wired connection 1" 
 
+# VSCode Server deployment
+CODE_SERVER_VERSION="${CODE_SERVER_VERSION:-4.138.0}"
+CODE_SERVER_PASSWORD=$ssh_password
+LAB_USER="ansiblerunner"
+LAB_HOME="/home/${LAB_USER}"
+WORKSPACE="${LAB_HOME}/rhis"
+
+mkdir -p "${WORKSPACE}"
+
+if ! command -v code-server >/dev/null 2>&1; then
+  case "$(uname -m)" in
+    x86_64)
+      CODE_SERVER_ARCH="amd64"
+      ;;
+    *)
+      echo "Unsupported architecture for code-server: $(uname -m)" >&2
+      exit 1
+      ;;
+  esac
+
+  CODE_SERVER_RPM="/var/tmp/code-server-${CODE_SERVER_VERSION}-${CODE_SERVER_ARCH}.rpm"
+  CODE_SERVER_URL="https://github.com/coder/code-server/releases/download/v${CODE_SERVER_VERSION}/code-server-${CODE_SERVER_VERSION}-${CODE_SERVER_ARCH}.rpm"
+
+  echo "Installing code-server ${CODE_SERVER_VERSION}"
+  curl --fail --location --retry 3 --output "${CODE_SERVER_RPM}" "${CODE_SERVER_URL}"
+  rpm -Uvh "${CODE_SERVER_RPM}"
+  rm -f "${CODE_SERVER_RPM}"
+fi
+
+echo "Configuring code-server for ${LAB_USER}"
+install -d -o "${LAB_USER}" -g "${LAB_USER}" -m 0700 "${LAB_HOME}/.config/code-server"
+printf '%s\n' \
+  'bind-addr: 0.0.0.0:8080' \
+  'auth: password' \
+  "password: ${CODE_SERVER_PASSWORD}" \
+  'cert: false' \
+  > "${LAB_HOME}/.config/code-server/config.yaml"
+chown "${LAB_USER}:${LAB_USER}" "${LAB_HOME}/.config/code-server/config.yaml"
+chmod 0600 "${LAB_HOME}/.config/code-server/config.yaml"
+
+# Keep Ansible extension settings outside the learner workspace. In particular,
+# disabling validation prevents ansible-lint from creating .ansible directories
+# next to the lesson files.
+VSCODE_USER_DIR="${LAB_HOME}/.local/share/code-server/User"
+install -d -o "${LAB_USER}" -g "${LAB_USER}" -m 0700 "${VSCODE_USER_DIR}"
+printf '%s\n' \
+  '{' \
+  '  "ansible.python.interpreterPath": "/usr/bin/python3",' \
+  '  "ansible.validation.enabled": false,' \
+  '  "ansible.validation.lint.enabled": false,' \
+  '  "security.workspace.trust.enabled": false' \
+  '}' \
+  > "${VSCODE_USER_DIR}/settings.json"
+chown "${LAB_USER}:${LAB_USER}" "${VSCODE_USER_DIR}/settings.json"
+chmod 0600 "${VSCODE_USER_DIR}/settings.json"
+
+# Keep the user service alive after the provisioning connection closes.
+systemctl enable --now code-server
+systemctl restart code-server
+systemctl --no-pager --full status code-server
+
+echo "code-server is listening on host1 TCP/8080 with ${WORKSPACE} ready to open."
+echo "A CNV route or proxy is still required before the Showroom browser tab can reach it."

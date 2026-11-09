@@ -111,16 +111,16 @@ virtualmachines:
       - default
       - secondary
     services:
-      - name: cockpit
+      - name: vscode-8080
         ports:
-          - port: 9090
+          - port: 8080
             protocol: TCP
-            targetPort: 9090
-            name: cockpit
+            targetPort: 8080
+            name: vscode
     routes:
-      - name: cockpit
-        host: cockpit
-        service: cockpit
-        targetPort: 9090
+      - name: vscode-8080
+        host: vscode
+        service: vscode-8080
+        targetPort: 8080
         tls: true
         tls_termination: Edge
