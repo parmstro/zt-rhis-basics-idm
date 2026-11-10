@@ -3,9 +3,6 @@
 # Define the log file paths
 LOG_FILE="/root/post-run.log"
 
-# Redirect stdout and stderr into a tee process
-exec > >(tee -a "$LOG_FILE") 2>&1
-
 subscription-manager config --rhsm.manage_repos=1
 subscription-manager register --activationkey=${ACTIVATION_KEY} --org=12451665 --force
 
@@ -27,6 +24,11 @@ echo 'redhat' | passwd --stdin ansiblerunner
 echo "configuring ansiblerunner sudo privileges"
 cat << EOF > /etc/sudoers.d/ansiblerunner
 ansiblerunner ALL=(ALL) NOPASSWD: ALL
+EOF
+
+tee -a /root/.ssh/config << EOF
+Host *
+    StrictHostKeyChecking no
 EOF
 
 echo "adding ansible-core"

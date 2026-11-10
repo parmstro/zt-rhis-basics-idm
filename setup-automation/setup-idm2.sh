@@ -3,9 +3,6 @@
 # Define the log file paths
 LOG_FILE="/root/post-run.log"
 
-# Redirect stdout and stderr into a tee process
-exec > >(tee -a "$LOG_FILE") 2>&1
-
 subscription-manager config --rhsm.manage_repos=1
 subscription-manager register --activationkey=${ACTIVATION_KEY} --org=12451665 --force
 
