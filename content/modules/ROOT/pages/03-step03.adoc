@@ -232,6 +232,28 @@ ssh-copy-id -i ~/.ssh/id_ed25519.pub ansiblerunner@idm1.example.local
 ssh-copy-id -i ~/.ssh/id_ed25519.pub ansiblerunner@idm2.example.local
 ```
 
+**NOTE: FOR SSC LAB only**
+We will unsubscribe and resubscribe our idm1 and idm2 systems
+Use the provisioner tab
+
+```
+ssh idm1.example.local
+subscription-manager unregister
+cp /etc/rhsm/rhsm.conf /etc/rhsm/rhsm.conf.rhdp
+cp /etc/rhsm/rhsm.conf.kat-backup /etc/rhsm.conf
+
+subscription-manager register --org <instructor_provided> --activationkey <instructor_provided>
+
+
+ssh idm1.example.local
+subscription-manager unregister
+cp /etc/rhsm/rhsm.conf /etc/rhsm/rhsm.conf.rhdp
+cp /etc/rhsm/rhsm.conf.kat-backup /etc/rhsm.conf
+
+subscription-manager register --org <instructor_provided> --activationkey <instructor_provided>
+```
+
+
 Part of the work that was done when we ran the inventory_update.sh help script was to create a helper script for launching our container.
 This provides us with a short command versus typing out a long ansible-playbook or navigator command.
 The script is named after your deployment.
