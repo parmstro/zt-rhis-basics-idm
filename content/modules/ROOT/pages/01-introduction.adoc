@@ -102,6 +102,8 @@ wget https://github.com/parmstro/rhis-builder-inventory/archive/refs/heads/main.
 unzip main.zip
 mv rhis-builder-inventory-main rhis-builder-inventory   # rename it for convenience
 cd rhis-builder-inventory
+git config --global user.email "ansiblerunner@example.local" # or your email
+git config --global user.name "Ansible Runner"             # or your name
 git init -b main                                        # you should ensure that the branch is main
 git add * --all
 git commit -m "Initial commit"
@@ -301,21 +303,21 @@ There are some caveats the come along with Red Hat IdM implementation.
 The most important is that because IdM uses Kerberos authentication IdM servers need to exist in their own DNS domain (or subdomain). 
 This is a requirement of Kerberos. 
 Kerberos depends heavily on DNS to provide SRV records to clients for service discovery.
-As an example, for a fictitious organization example.com that following service record exists and points to the two replicating idm servers.
+As an example, for a fictitious organization example.local that following service record exists and points to the two replicating idm servers.
 All is well in the world!
 
 ```
-_kerberos-master._tcp      SRV     0 100 88 idm1.example.com.
-                           SRV     0 100 88 idm2.example.com.
+_kerberos-master._tcp      SRV     0 100 88 idm1.example.local.
+                           SRV     0 100 88 idm2.example.local.
 ```
 
 However, if we have another idm service in the same domain, or an Active Directory service in the same domain...
 
 ```
-_kerberos-master._tcp     SRV     0 100 88 idm1.example.com.
-                          SRV     0 100 88 idm2.example.com.
-                          SRV     0 100 88 addc1.example.com.
-                          SRV     0 100 88 addc2.example.com.
+_kerberos-master._tcp     SRV     0 100 88 idm1.example.local.
+                          SRV     0 100 88 idm2.example.local.
+                          SRV     0 100 88 addc1.example.local.
+                          SRV     0 100 88 addc2.example.local.
 ```
 All is no longer well with the world.
 Now we end up with the same SRV record pointing to systems that maintain 2 different services. 
@@ -324,10 +326,10 @@ Roughly 50% of the time we will get authentication/lookup failures because we ar
 
 ----
 ASIDE:
-Customers typically implement something like example.com for the main domain and the domain supported by active directory. 
+Customers typically implement something like example.local for the main domain and the domain supported by active directory. 
 AD deployments have been the standard for years. 
-The IdM deployment typically becomes a subdomain like linux.example.com.
-The example.com domain then delegates / forwards requests to linux.example.com. 
+The IdM deployment typically becomes a subdomain like linux.example.local.
+The example.local domain then delegates / forwards requests to linux.example.local. 
 We can use many methodologies to manage migrations to a sub domain.
 ----
 

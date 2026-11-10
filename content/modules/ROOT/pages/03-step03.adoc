@@ -1,4 +1,70 @@
-== Welcome to Module 3
+== Welcome to Module 3 - Creating our vault file and launching the container.
 
-Creating a Vault File
-Launching the container
+As you can imagine when building an environment such as RHIS, there are lots of secrets that need to be maintained that we do not want in our inventory.
+Since we are running ansible, there are a wide variety of secrets management tools that we can use to ensure that our data is safe.
+The simplest, especially if we are building an enviroment (almost) from scratch is to use Anisible's native vault capability. 
+In a brownfield environment we might make use of an existing facility.
+
+
+=== Creating a Vault File
+
+As part of the deployment creation process, we ensire that there is a vault directory and a vault_SAMPLES directory.
+If you examine the vault_SAMPLES directory you will find a README.md file and a rhis_builder_vault_SAMPLE.yml file.
+
+Use the provisioner terminal window or the vscode terminal window to create your vault file.
+Make a copy of the rhis_builder_vault_SAMPLE.yml file in the vault directory.
+
+```
+cd /home/ansiblerunner/rhis/rhis-builder-inventory/deployments/example.local/vault_SAMPLES
+cp rhis_builder_vault_SAMPLE.yml ../vault/rhis_builder_vault.yml
+```
+
+This file will become our definitive vault file. 
+This particular directory is never overwritten when we run inventory_update.sh
+Vault files are usually specific to the deployment you are creating and typically reside with the rendered configuration.
+
+
+=== Editing the vault file
+
+Currently the vault file is not encrypted. 
+This makes the file easier to edit in our VSCode environment. 
+You encrypt the file by running the following command:
+
+```
+ansible-vault encrypt rhis_builder_vault.yml
+```
+
+You will be prompted for a password and to verify the password. 
+We are doing it now on the initial copy so we don't lose anything valuable if we get it wrong.
+We can simply copy over it at this point.
+
+If you look at the file in VSCode or in the terminal, you will see something like:
+
+```
+$ANSIBLE_VAULT;1.1;AES256
+63653830646165336332313332393633386634346235623534623830623634346362363139306134
+6234343631353832383334613837663863363932636137630a656230393065376333663963663461
+62663639366635343866653637633332396132343966653438393732303036346331323339313731
+6234663162336564620a313866656133316365643862636534353065656562623366653335396232
+33306634626337643465323434666332353539636265333134653364636162613163323264633364
+32323834626661663238623537393766393734313665333634373731353238363565356237396634
+66336238373664336539656232376466356563666236323735643864326262346563636639323163
+32333630333130623663643562383665633835623238373365306564386463306161386365363130
+...
+...
+```
+
+You can edit the file at the commandline by using:
+
+```
+ansible-vault edit rhis_builder_vault.yml
+```
+
+
+There is a simple extension that you can add to your environment that will allow to encrypt and decrypt your vault file on demand with a mouse click.
+
+ansible-vault-inline by wolfmah
+
+This extension allows you to create a vault variable file in a directory of your choice and then use the contained password to encrypt and decrypt your vault file.
+
+=== Launching the container

@@ -34,10 +34,10 @@ To create a deployment, we first make a copy of the sample inventory_basevars.ym
 The recommended practice is to name this after your DNS domain that you will be managing.
 
 ```
-cp /rhis/rhis-builder-inventory/inventory_basevars.yml /rhis/rhis-builder-inventory/example.com_inventory_basevars.yml
+cp /rhis/rhis-builder-inventory/inventory_basevars.yml /rhis/rhis-builder-inventory/example.local_inventory_basevars.yml
 ```
 
-We will examine the new example.com_inventory_basevars.yml file a section at a time.
+We will examine the new example.local_inventory_basevars.yml file a section at a time.
 
 Let's start. Most of these are self explanatory.
 
@@ -60,7 +60,7 @@ basevars_disconnected_domain: false
 basevars_global_domain_name sets the domain name for all systems within the deployment. 
 You will see in the inventory that we define server roles by shortname. 
 When we deploy, the standard is <shortname><#>.<basevars_global_domain_name>
-e.g. idm1.example.com
+e.g. idm1.example.local
 
 Next, is
 
@@ -158,11 +158,11 @@ Exceeding a limit will generate and error on inventory update.
 The default counts for a test environment are presented above.
 We will only be deploying an IdM primary and replica, so when we edit ours, all values will be zero except idm which will be 2.
 
-You created a copy earlier. Now edit the file example.com_inventory_basevars.yml now and make these changes:
+You created a copy earlier. Now edit the file example.local_inventory_basevars.yml now and make these changes:
 
 ```
 # GLOBAL VARIABLES THAT APPLY TO ALL HOSTS
-basevars_global_domain_name: "example.com"
+basevars_global_domain_name: "example.local"
 ```
 
 ```
@@ -220,12 +220,12 @@ The deployment is always generated and meant to be overwritten.
 === Generating a deployment.
 
 Let's generate the first deployment.
-Now that you have editted your example.com_inventory_basevars.yml file we will use the inventory_update.sh helper script to launch our playbooks to create the deployment.
+Now that you have editted your example.local_inventory_basevars.yml file we will use the inventory_update.sh helper script to launch our playbooks to create the deployment.
 On the provisioner or the terminal window in vscode. Run the following commands.
 
 ```
 cd /home/ansiblerunner/rhis/rhis-builder-inventory
-./inventory_update.sh --basevars-file example.com_inventory_basevars.yml
+./inventory_update.sh --basevars-file example.local_inventory_basevars.yml
 ```
 
 You will start to see the system generate the new deployment.
@@ -239,7 +239,7 @@ PLAY [Generate the new inventory from templates] *******************************
 
 TASK [Generating with requested basevars file] *********************************
 ok: [localhost] => {
-    "basevars_file": "example.com_inventory_basevars.yml"
+    "basevars_file": "example.local_inventory_basevars.yml"
 }
 
 TASK [Validate the basevars_file] **********************************************
@@ -282,7 +282,7 @@ ok: [localhost] => (item=aaphop: 0/9)
 
 TASK [Congratulations] *********************************************************
 ok: [localhost] => {
-    "msg": "Your deployment configuration can be found at deployments/example.com"
+    "msg": "Your deployment configuration can be found at deployments/example.local"
 }
 
 PLAY RECAP *********************************************************************
@@ -292,7 +292,7 @@ localhost                  : ok=117  changed=21   unreachable=0    failed=0    s
 
 When the ansible play completes with no errors, then you can examine your deployment at:
 
-deployments/example.com/ 
+deployments/example.local/ 
 
 throught VSCode window.
 
