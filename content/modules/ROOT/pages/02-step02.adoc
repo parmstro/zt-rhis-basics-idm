@@ -34,7 +34,8 @@ To create a deployment, we first make a copy of the sample inventory_basevars.ym
 The recommended practice is to name this after your DNS domain that you will be managing.
 
 ```
-cp /rhis/rhis-builder-inventory/inventory_basevars.yml /rhis/rhis-builder-inventory/example.local_inventory_basevars.yml
+cd ~/rhis/rhis-builder-inventory/
+cp inventory_basevars.yml example.local_inventory_basevars.yml
 ```
 
 We will examine the new example.local_inventory_basevars.yml file a section at a time.
@@ -167,8 +168,8 @@ basevars_global_domain_name: "example.local"
 
 ```
 default_network: "192.168.0.0"
-default_network_prefix: "24"
-default_network_mask: "255.255.255.0"
+default_network_prefix: "23"
+default_network_mask: "255.255.254.0"
 ```
 
 Set these values to your home town or something familiar
@@ -298,7 +299,11 @@ throught VSCode window.
 
 Examine your deployment. 
 Note what directories where created. 
-Examine the some files to see if your basevars where included properly. 
+Examine the some files to see if your basevars where included properly.
+
+What happens if you get it wrong!!
+Nothing.
+Just fix the config and run the ansible again!
 
 When you are finished, it is time to move to the next module.
 
