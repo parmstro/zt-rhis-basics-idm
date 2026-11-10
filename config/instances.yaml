@@ -17,17 +17,17 @@ virtualmachines:
       - default
       - secondary
     services:
-      - name: idm-webui
+      - name: idm1-webui
         ports:
           - port: 80
             protocol: TCP
             targetPort: 80
-            name: idm-webui
+            name: idm1-webui
 
     routes:
-      - name: idm-webui
-        host: idm-webui
-        service: idm-webui
+      - name: idm1-webui
+        host: idm1-webui
+        service: idm1-webui
         targetPort: 80
         tls: true
         tls_termination: edge
@@ -49,17 +49,20 @@ virtualmachines:
       - default
       - secondary
     services:
-      - name: idm2
+      - name: idm2-webui
         ports:
-          - port: 443
+          - port: 80
             protocol: TCP
-            targetPort: 443
-            name: idm2
+            targetPort: 80
+            name: idm2-webui
+
     routes:
-      - name: idm2
-        host: idm2
-        service: idm2
-        targetPort: 443
+      - name: idm2-webui
+        host: idm2-webui
+        service: idm2-webui
+        targetPort: 80
+        tls: true
+        tls_termination: edge
 
   - name: "client1"
 #    image: "rhel-10-0-07-09-25-3"
@@ -123,4 +126,4 @@ virtualmachines:
         service: vscode-8080
         targetPort: 8080
         tls: true
-        tls_termination: Edge
+        tls_termination: edge

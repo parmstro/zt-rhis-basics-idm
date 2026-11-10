@@ -86,7 +86,7 @@ tabs:
 # remember you are not dealing with hostnames but rather OCP services and routes
 
   - name: "IdM Web UI"
-    url: https://idm-webui-${guid}.${domain}/ipa/ui/
+    url: https://idm1-webui-${guid}.${domain}/ipa/ui/
 
 #  - name: "RHEL Web Console"
 #    url: https://cockpit-${guid}.${domain}/
