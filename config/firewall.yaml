@@ -12,6 +12,10 @@ egress:
         port: 443
       - protocol: TCP
         port: 22
+      - protocol: UDP
+        port: 53
+      - protocol: TCP
+        port: 53
   - to:
       - podSelector:
           matchLabels:
