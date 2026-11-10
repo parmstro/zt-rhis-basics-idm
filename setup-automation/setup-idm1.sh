@@ -57,7 +57,7 @@ hostnamectl set-hostname idm1.example.local
 
 hostnamectl >> /root/post-run.log
 
-nmcli conn mod "Wired connection 2" ipv4.addresses 192.168.0.10/24 ipv4.method manual connection.autoconnect yes
+nmcli conn mod "Wired connection 2" ipv4.addresses 192.168.0.10/23 ipv4.method manual connection.autoconnect yes
 nmcli conn up "Wired connection 2" 
 
 # rhel user is already part of wheel

@@ -31,7 +31,14 @@ Host *
 EOF
 
 echo "Adding ansible-core" >> /root/post-run.log
-dnf install -y ansible-core bind-utils git
+dnf install -y ansible-core \
+               bind-utils \
+               git \
+               wget \
+               unzip \
+               vim \
+               tree \
+               container-tools
 
 myip="$(hostname -I | awk '{print $1}')"
 agent variable set MY_IP $myip
@@ -59,7 +66,7 @@ echo "Setting the hostname" >> /root/post-run.log
 
 hostnamectl set-hostname provisioner.example.local
 
-nmcli conn mod "Wired connection 2" ipv4.addresses 192.168.0.30/24 ipv4.dns 192.168.0.10 ipv4.method manual connection.autoconnect yes
+nmcli conn mod "Wired connection 2" ipv4.addresses 192.168.0.30/23 ipv4.dns 192.168.0.10 ipv4.method manual connection.autoconnect yes
 nmcli conn up "Wired connection 2" 
 nmcli conn mod "Wired connection 1" ipv4.dns 192.168.0.10
 nmcli conn up "Wired connection 1" 
