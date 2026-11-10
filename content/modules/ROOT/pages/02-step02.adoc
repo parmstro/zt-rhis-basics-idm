@@ -225,6 +225,80 @@ On the provisioner or the terminal window in vscode. Run the following commands.
 
 ```
 cd /home/ansiblerunner/rhis/rhis-builder-inventory
-./inventory_update.sh
+./inventory_update.sh --basevars-file example.com_inventory_basevars.yml
 ```
+
+You will start to see the system generate the new deployment.
+
+```
+[ansiblerunner@provisioner rhis]$ cd rhis-builder-inventory
+[ansiblerunner@provisioner rhis-builder-inventory]$ ./inventory_update.sh
+Executing inventory update.
+
+PLAY [Generate the new inventory from templates] *******************************
+
+TASK [Generating with requested basevars file] *********************************
+ok: [localhost] => {
+    "basevars_file": "example.com_inventory_basevars.yml"
+}
+
+TASK [Validate the basevars_file] **********************************************
+ok: [localhost]
+
+TASK [Assertion] ***************************************************************
+ok: [localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+
+TASK [Include inventory base variable via vars file] ***************************
+ok: [localhost]
+
+TASK [Validate network prefix supports the addressing scheme] ******************
+ok: [localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+
+TASK [Include system count limits] *********************************************
+ok: [localhost]
+
+TASK [Validate system counts do not exceed limits] *****************************
+ok: [localhost] => (item=satellite: 1/1)
+ok: [localhost] => (item=capsule: 1/6)
+ok: [localhost] => (item=idm: 2/16)
+ok: [localhost] => (item=gitea: 0/1)
+ok: [localhost] => (item=logserver: 0/1)
+ok: [localhost] => (item=aapgateway: 0/9)
+ok: [localhost] => (item=aapcontroller: 1/9)
+ok: [localhost] => (item=aapedacontroller: 0/9)
+ok: [localhost] => (item=aaphub: 0/9)
+ok: [localhost] => (item=aapdatabase: 0/9)
+ok: [localhost] => (item=aapexecution: 0/9)
+ok: [localhost] => (item=aaphop: 0/9)
+...
+...
+...
+
+TASK [Congratulations] *********************************************************
+ok: [localhost] => {
+    "msg": "Your deployment configuration can be found at deployments/example.com"
+}
+
+PLAY RECAP *********************************************************************
+localhost                  : ok=117  changed=21   unreachable=0    failed=0    skipped=85   rescued=0    ignored=0
+
+```
+
+When the ansible play completes with no errors, then you can examine your deployment at:
+
+deployments/example.com/ 
+
+throught VSCode window.
+
+Examine your deployment. 
+Note what directories where created. 
+Examine the some files to see if your basevars where included properly. 
+
+When you are finished, it is time to move to the next module.
 
