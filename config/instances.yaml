@@ -4,7 +4,7 @@ virtualmachines:
 #    image: "rhel-10-0-07-09-25-3"
     image: "rhel-9.7"
     bootloader: efi
-    memory: "4G"
+    memory: "8G"
     cores: 1
     image_size: "40G"
     packages:
@@ -36,7 +36,7 @@ virtualmachines:
 #    image: "rhel-10-0-07-09-25-3"
     image: "rhel-9.7"
     bootloader: efi
-    memory: "4G"
+    memory: "8G"
     cores: 1
     image_size: "40G"
     packages:
@@ -102,7 +102,7 @@ virtualmachines:
 #    image: "rhel-10-0-07-09-25-3"
     image: "rhel-9.7"
     bootloader: efi
-    memory: "4G"
+    memory: "8G"
     cores: 1
     image_size: "40G"
     packages:
