@@ -1,27 +1,26 @@
 #!/bin/bash
 
 # Define the log file paths
-LOG_FILE="/root/post-run.log"
 
 subscription-manager config --rhsm.manage_repos=1
 subscription-manager register --activationkey=${ACTIVATION_KEY} --org=12451665 --force
 
-echo "remove GCP repos"
+echo "Removing GCP repos" >> /root/post-run.log
 mv /etc/yum.repos.d/google-cloud.repo /root
 
-echo "Adding rhel user"
+echo "Adding rhel user" >> /root/post-run.log
 usermod -aG wheel rhel
 
-echo "setting password for rhel"
+echo "Setting password for rhel" >> /root/post-run.log
 echo 'redhat' | passwd --stdin rhel
 
-echo "Adding ansiblerunner user"
-useradd -mG wheel ansiblerunner
+echo "Adding ansiblerunner user" >> /root/post-run.log
+useradd -m -G wheel ansiblerunner
 
-echo "setting password for ansiblerunner"
+echo "Setting password for ansiblerunner" >> /root/post-run.log
 echo 'redhat' | passwd --stdin ansiblerunner
 
-echo "configuring ansiblerunner sudo privileges"
+echo "Configuring ansiblerunner sudo privileges" >> /root/post-run.log
 cat << EOF > /etc/sudoers.d/ansiblerunner
 ansiblerunner ALL=(ALL) NOPASSWD: ALL
 EOF
@@ -31,12 +30,12 @@ Host *
     StrictHostKeyChecking no
 EOF
 
-echo "adding ansible-core"
+echo "Adding ansible-core" >> /root/post-run.log
 dnf install -y ansible-core bind-utils git
 
 myip="$(hostname -I | awk '{print $1}')"
 agent variable set MY_IP $myip
-agent variable set SSH_PASSWORD $ssh_password
+agent variable set SSH_PASSWORD "redhat"
 
 agent variable set SHORTNAME $_SANDBOX_ID
 
@@ -56,7 +55,7 @@ echo "192.168.0.20 $IDM_CLIENT1_NAME" >> /etc/hosts
 echo "192.168.0.21 $IDM_CLIENT2_NAME" >> /etc/hosts
 echo "192.168.0.30 $PROVISIONER_NAME" >> /etc/hosts
 
-echo "Setting the hostname"
+echo "Setting the hostname" >> /root/post-run.log
 
 hostnamectl set-hostname provisioner.example.local
 
@@ -94,7 +93,7 @@ if ! command -v code-server >/dev/null 2>&1; then
   rm -f "${CODE_SERVER_RPM}"
 fi
 
-echo "Configuring code-server for ${LAB_USER}"
+echo "Configuring code-server for ${LAB_USER}" >> /root/post-run.log
 install -d -o "${LAB_USER}" -g "${LAB_USER}" -m 0700 "${LAB_HOME}/.config/code-server"
 printf '%s\n' \
   'bind-addr: 0.0.0.0:8080' \
@@ -128,5 +127,5 @@ sudo systemctl --user -M "${LAB_USER}@" enable code-server.service
 sudo systemctl --user -M "${LAB_USER}@" restart code-server.service
 sudo systemctl --user -M "${LAB_USER}@" status code-server.service
 
-echo "code-server is listening on host1 TCP/8080 with ${WORKSPACE} ready to open."
-echo "A CNV route or proxy is still required before the Showroom browser tab can reach it."
+echo "code-server is listening on host1 TCP/8080 with ${WORKSPACE} ready to open." >> /root/post-run.log
+echo "A CNV route or proxy is still required before the Showroom browser tab can reach it." >> /root/post-run.log

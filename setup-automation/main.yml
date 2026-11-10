@@ -46,7 +46,7 @@
       state: directory
       mode: '0755'
 
-  - name: Check if setup-server.sh exists
+  - name: Check if setup script exists
     ansible.builtin.stat:
       path: "./setup-{{ config_host }}.sh"
     delegate_to: localhost
@@ -59,7 +59,7 @@
       dest: "/tmp/setup-scripts/setup-{{ ansible_host }}.sh"
     register: r_result
 
-  - name: Execute module_stage-host.sh if it exists
+  - name: Execute setup script if it exists
     when: r_script_test.stat.exists
     shell: "sh -x /tmp/setup-scripts/setup-{{ ansible_host }}.sh > /tmp/setup-scripts/setup-{{ ansible_host }}.log 2>&1"
     become: true

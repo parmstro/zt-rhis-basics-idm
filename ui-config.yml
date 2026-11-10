@@ -39,7 +39,7 @@ tabs:
     url: https://vscode-${guid}.${domain}/?folder=/home/ansiblerunner/rhis/
 
   - name: "provisioner"
-    url: /wetty_provisioner/ssh/ansiblerunner
+    url: /wetty_provisioner/ssh/root
   
   - name: "idm1"
     url: /wetty_idm1/ssh/root
