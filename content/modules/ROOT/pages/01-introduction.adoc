@@ -7,6 +7,9 @@
 This text is in a resizable frame. Some of the commands you will need are wider than the default area.
 Use your mouse to grab the resize bar that separates the text from the terminal window and resize the these contents for comfortable viewing.
 
+At the bottom of this documentation page are the module navigation buttons to go forward and backward. 
+NOTE: There is a solve button. This is NOT implemented. Clicking the button will do nothing.
+
 Some of the commands that you need to execute in the terminal window are provided to you for convenience.
 They are listed in a code formatted area.
 On the right side of the code formatted area there are a couple of buttons.
