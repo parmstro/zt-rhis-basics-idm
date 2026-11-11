@@ -71,6 +71,7 @@ nmcli conn up "Wired connection 2"
 nmcli conn mod "Wired connection 1" ipv4.dns 192.168.0.10
 nmcli conn up "Wired connection 1" 
 
+
 # VSCode Server deployment
 CODE_SERVER_VERSION="${CODE_SERVER_VERSION:-4.138.0}"
 CODE_SERVER_PASSWORD="redhat"
