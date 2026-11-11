@@ -33,6 +33,7 @@ You encrypt the file by running the following command:
 
 [source,bash]
 ----
+cd /home/ansiblerunner/rhis/rhis-builder-inventory/deployments/example.local/vault
 ansible-vault encrypt rhis_builder_vault.yml
 ----
 
@@ -41,6 +42,10 @@ You are doing it now on the initial copy so you don't lose anything valuable if 
 You can simply copy over it at this point.
 
 If you look at the file in VSCode or in the terminal, you will see something like:
+[source,bash]
+----
+less rhis_builder_vault.yml
+----
 
 ```
 $ANSIBLE_VAULT;1.1;AES256
@@ -59,6 +64,10 @@ $ANSIBLE_VAULT;1.1;AES256
 === Editing the vault file
 
 Again from the provisioner tab as ansiblerunner.
+You should already be in the vault directory
+
+e.g.
+/home/ansiblerunner/rhis/rhis-builder-inventory/deployments/example.local/vault
 
 You can edit the file at the commandline by using:
 
@@ -236,11 +245,16 @@ This provides us with a short command versus typing out a long ansible-playbook 
 The script is named after your deployment.
 
 You should be able to find it in the root of the project.
-```
+[source,bash]
+----
 ls example.local.25.sh
-```
+----
 
 Execute the script.
+[source,bash]
+----
+./example.local.25.sh
+----
 
 You should see this output:
 ```
