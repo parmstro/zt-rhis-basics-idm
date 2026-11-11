@@ -73,6 +73,10 @@ nmcli conn up "Wired connection 1"
 
 
 # VSCode Server deployment
+### NOTE: THE LAB_USER VARIABLE IS ALSO SET AND REFERENCED IN THE RUNTIME AUTOMATION SCRIPTS. 
+### This is being done as we can't reliably determine if the necessary hosts are up when this script is run.
+### IF YOU CHANGE IT HERE, MAKE SURE TO UPDATE IT THERE AS WELL.
+
 CODE_SERVER_VERSION="${CODE_SERVER_VERSION:-4.138.0}"
 CODE_SERVER_PASSWORD="redhat"
 LAB_USER="ansiblerunner"
@@ -130,6 +134,10 @@ chmod 0600 "${VSCODE_USER_DIR}/settings.json"
 
 # Keep the user service alive after the provisioning connection closes.
 loginctl enable-linger "${LAB_USER}"
+sudo mkdir -p /run/user/$(id -u "${LAB_USER}")
+sudo chown "${LAB_USER}:${LAB_USER}" /run/user/$(id -u "${LAB_USER}")
+export XDG_RUNTIME_DIR=/run/user/$(id -u "${LAB_USER}")
+
 sudo chown -R "${LAB_USER}:${LAB_USER}" "/home/${LAB_USER}"
 sudo systemctl --user -M "${LAB_USER}@" enable code-server.service
 sudo systemctl --user -M "${LAB_USER}@" restart code-server.service
