@@ -166,7 +166,7 @@ rhis_system_count:
   kvm_hypervisors: 0
   quadlet: 2
   quay: 0
-  ```
+```
 
 This list defines the different RHIS system roles that you can deploy.
 The default list is configured to deploy a minimal RHIS environment with IdM, Satellite, AAP and nodes to run containers.
@@ -277,11 +277,11 @@ The deployment is always generated.
 The templates are our source of truth. 
 **Try to never edit the deployment files directly.**
 
-<hr>
+'''
 **ASIDE:** Realistically, you may do this to quickly test something while debugging, but you want to make sure that you edit your templates and regenerate the deployment.
 But the templates are our source of truth.
 The deployment is always generated and meant to be overwritten.
-<hr>
+'''
 
 
 === Generating a deployment.

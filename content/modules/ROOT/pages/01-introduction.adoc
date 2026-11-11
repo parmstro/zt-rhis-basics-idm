@@ -240,7 +240,7 @@ cd ~/rhis/rhis-builder-inventory
 ./update_containers.sh
 ----
 
-<hr>
+'''
 NOTE: I you experience an error like:
 
 Failed to obtain podman configuration: mkdir /run/user/0/libpod: permission denied
@@ -254,7 +254,7 @@ sudo chown ansiblerunner:ansiblerunner /run/user/$(id -u ansiblerunner)
 export XDG_RUNTIME_DIR=/run/user/$(id -u ansiblerunner)
 ----
 Now you can retry...
-<hr>
+'''
 
 Your output should be similar to:
 ```
@@ -293,8 +293,8 @@ localhost/rhis-provisioner-9-2.5          latest                7965ed40c884  0 
 
 **You can proceed to Module 02 or continue reading.**
 
+'''
 
-<hr>
 If you want to ensure that you have a copy of your work for you to continue to work with you can follow these instructions.
 Please ensure that you have an internet accessible git account that you can access.
 The example below uses github. 
