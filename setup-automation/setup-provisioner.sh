@@ -1,9 +1,29 @@
 #!/bin/bash
 
+retry() {
+    for i in {1..3}; do
+        echo "Attempt $i: $2"
+        if $1; then
+            return 0
+        fi
+        [ $i -lt 3 ] && sleep 5
+    done
+    echo "Failed after 3 attempts: $2"
+    exit 1
+}
+
 # Define the log file paths
 
-subscription-manager config --rhsm.manage_repos=1
-subscription-manager register --activationkey=${ACTIVATION_KEY} --org=12451665 --force
+echo "Registering with subscription manager" > /root/post-run.log
+subscription-manager clean || true
+rpm -e $(rpm -qa 'katello-ca-consumer-*') 2>/dev/null || true
+retry "curl -k -L https://${SATELLITE_URL}/pub/katello-server-ca.crt -o /etc/pki/ca-trust/source/anchors/${SATELLITE_URL}.ca.crt"
+retry "update-ca-trust"
+retry "rpm -Uhv https://${SATELLITE_URL}/pub/katello-ca-consumer-latest.noarch.rpm"
+subscription-manager status
+if [ $? -ne 0 ]; then
+    retry "subscription-manager register --org=${SATELLITE_ORG} --activationkey=${SATELLITE_ACTIVATIONKEY}"
+fi
 
 echo "Removing GCP repos" >> /root/post-run.log
 mv /etc/yum.repos.d/google-cloud.repo /root

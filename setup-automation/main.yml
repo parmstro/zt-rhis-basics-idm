@@ -29,12 +29,18 @@
 - name: Demo Playbook for the ansible-runner API
   hosts: all:!localhost
   gather_facts: false
+  vars:
+    satellite_url: "{{ lookup('ansible.builtin.env', 'SATELLITE_URL') }}"
+    satellite_org: "{{ lookup('ansible.builtin.env', 'SATELLITE_ORG') }}"
   tasks:
 
   - ansible.builtin.wait_for_connection:
   - name: Simple debug task
     ansible.builtin.debug:
       msg: "Hello Runner"
+
+  - name: Include satellite activation key secret
+    ansible.builtin.include_vars: ../secrets/satellite-activationkey.yaml
 
   - name: Set config_host variable with ansible_host value
     set_fact:
@@ -67,6 +73,9 @@
     environment:
       GUID: "{{ lookup('ansible.builtin.env', 'GUID') }}"
       DOMAIN: "{{ lookup('ansible.builtin.env', 'DOMAIN') }}"
+      SATELLITE_URL: "{{ satellite_url }}"
+      SATELLITE_ORG: "{{ satellite_org }}"
+      SATELLITE_ACTIVATIONKEY: "{{ satellite_activationkey }}"
 
   - name: Output script result
     ansible.builtin.debug:
