@@ -11,7 +11,7 @@ Some of the commands that you need to execute in the terminal window are provide
 They are listed in a code formatted area.
 On the right side of the code formatted area there are a couple of buttons.
 The first button copies all the text to the clipboard.
-The second botton actually executes the code in the terminal.
+The second button actually executes the code in the terminal.
 When possible, try to type and execute the code yourself.
 It helps with learning.
 If you are having trouble, by all means, click away!
@@ -40,16 +40,16 @@ image::lab-environment.svg[Lab Environment]
 This is a RHIS automation lab, as with all RHIS automation labs, the vast majority of our work will be done from the provisioner node.
 The provisioner node will store our yaml inventory files for configuring the environment.
 It will also house the rhis-provisioner container. 
-We will launch the rhis-provisioner container and run our commands via ansible "wrapper" scripts for ease of use.
+You will launch the rhis-provisioner container and run our commands via ansible "wrapper" scripts for ease of use.
 
-When working with IdM directly to understand our environment, we can consider an IdM Primary server and an IdM Replica server to be identical, the only difference being the order of installation. 
-In more sophisticated installations, we can configure servers to perform different roles to streamline Identity Management processing and operational workflow.
-For our first environment, the will be identical to support full redundancy of services as we have only 2 systems. 
+When working with IdM directly to understand our environment, you can consider an IdM Primary server and an IdM Replica server to be identical, the only difference being the order of installation. 
+In more sophisticated installations, you can configure servers to perform different roles to streamline Identity Management processing and operational workflow.
+For our first environment, the will be identical to support full redundancy of services as you have only 2 systems. 
 Identity Management environments can support as many as 64 replicas in a mesh-like configuration. 
 Services may be distributed to optimize replication.
 
 There are additional tabs on the right side of the screen to allow you additional interaction if necessary.
-One tab, is labelled for the idmprimary and one for idmclient1.
+One tab, is labelled for the idm1 and one for client1.
 You are logged into the consoles with root access by the environment.
 A local user account has also been created that you can use:
 
@@ -61,16 +61,17 @@ password: {bastion_ssh_password}
 
 This user is a member of wheel and has sudo access.
 
-Use the ansiblerunner account for all operations outside the container unless documented otherwise.
+**Use the ansiblerunner account for all operations outside the container unless documented otherwise.**
+**Use the provisioner terminal tab or a terminal from VSCode for all operations unless documented otherwise**
 The an alternative root level account can be accessed should it become necessary.
-Throughout the workshop we will create a variety of other users.
+Throughout the workshop you will create a variety of other users.
 The instructions will be clear as to what operations are to be performed using a specific login.
 
 ==== Let's get started
 === Exercise 1.1 - Fetch the rhis-builder inventory and container
 
 The Red Hat Infrastructure Standard Builder (rhis-builder) project separates the environment configuration from the code that builds it.
-There are two major componentents that we will use:
+There are two major components that you will use:
 
 - rhis-provisioner container
 - rhis-builder-inventory repository
@@ -79,24 +80,24 @@ The rhis-provisioner container is the execution engine.
 It isolates you from all the dependencies needed to deploy the RHIS architecture.
 The container has all the binary, python and ansible dependencies and the necessary ansible collections necessary.
 It also has the remainder of the rhis-builder repositories baked in. 
-We ensure that this container is scanned for issues and vulnerabilities, generate a sbom and sign the container using sigstore.
+You ensure that this container is scanned for issues and vulnerabilities, generate a sbom and sign the container using sigstore.
 The container is launched and mounts the inventory repo to get its configuration.
 
 The rhis-builder-inventory repo contains all the templates used to build your deployments and the code to generate those deployments.
-We will download a copy of the repository and then examine the components, the elements that we need to change to customize our configuration and generate our deployment.
+You will download a copy of the repository and then examine the components, the elements that you need to change to customize our configuration and generate our deployment.
 
 If you want to save your work from this session, you will need to configure a git remote after you pull the project down.
-You will notice that we are copying the content rather than forking the repository. 
+You will notice that the contents are copied rather than forking the repository. 
 This is because the resulting repository is fully yours to control, you don't want to merge or push any of your changes to our public repository.
 
-**IMPORTANT:** ALL configuration in the repository is ficticious. DO NOT ADD ANY CORPORATE OR PERSONALLY IDENTIFYING DATA. 
+**IMPORTANT:** ALL configuration in the repository is fictitious. DO NOT ADD ANY CORPORATE OR PERSONALLY IDENTIFYING DATA. 
 
 These steps allow you to get the content and create a local git repository.
 
-Run these steps on the provisioner node as the ansiblerunner user in the ansiblerunner home directory.
+**Run these steps on the provisioner node as the ansiblerunner user in the ansiblerunner home directory.**
 
-```
-mkdir rhis
+[source,bash]
+----
 cd rhis
 wget https://github.com/parmstro/rhis-builder-inventory/archive/refs/heads/main.zip
 unzip main.zip
@@ -107,7 +108,7 @@ git config --global user.name "Ansible Runner"             # or your name
 git init -b main                                        # you should ensure that the branch is main
 git add * --all
 git commit -m "Initial commit"
-```
+----
 
 You will get output that looks like this.
 
@@ -175,9 +176,10 @@ hint: Disable this message with "git config set advice.addIgnoredFile false"
 ```
 
 Running git status should show you on branch main, with some hidden files not committed.
-```
+[source,bash]
+----
 git status
-```
+----
 
 Output:
 ```
@@ -191,6 +193,11 @@ nothing added to commit but untracked files present (use "git add" to track)
 ```
 
 Running tree -L 1 should look like the following:
+[source,bash]
+----
+tree -L 1
+----
+
 ```
 .
 ├── docs
@@ -224,10 +231,27 @@ Running tree -L 1 should look like the following:
 The last thing to do in this section is to get the rhis-provisioner container.
 There is a help script for this in the root of the rhis-builder-inventory repository.
 
-```
+[source,bash]
+----
 cd ~/rhis/rhis-builder-inventory
 ./update_containers.sh
-```
+----
+
+<hr>
+NOTE: I you experience an error like:
+
+Failed to obtain podman configuration: mkdir /run/user/0/libpod: permission denied
+It means that there may have been an issue with your system during provisioning.
+Running the following commands will correct the issue:
+
+[source,bash]
+----
+sudo mkdir -p /run/user/$(id -u ansiblerunner)
+sudo chown ansiblerunner:ansiblerunner /run/user/$(id -u ansiblerunner)
+export XDG_RUNTIME_DIR=/run/user/$(id -u ansiblerunner)
+----
+Now you can retry...
+<hr>
 
 Your output should be similar to:
 ```
@@ -252,23 +276,22 @@ This is expected as it is not released yet.
 Run podman images to ensure that you can see the container is added. 
 The minimum tag for this course should be 1.0.146
 
-```
+[source,bash]
+----
 podman images
-```
+----
 
 ```
 [ansiblerunner@provisioner rhis-builder-inventory]$ podman images
 REPOSITORY                                TAG                   IMAGE ID      CREATED       SIZE
-localhost/rhis-provisioner-9-2.5          1.0.146               7965ed40c884  0 days ago    581 MB
-quay.io/parmstro/rhis-provisioner-9-2.5   1.0.146               7965ed40c884  0 days ago    581 MB
 quay.io/parmstro/rhis-provisioner-9-2.5   latest                7965ed40c884  0 days ago    581 MB
 localhost/rhis-provisioner-9-2.5          latest                7965ed40c884  0 days ago    581 MB
 ```
 
-You can proceed to module 02 or continue reading.
+**You can proceed to Module 02 or continue reading.**
 
 
-
+<hr>
 If you want to ensure that you have a copy of your work for you to continue to work with you can follow these instructions.
 Please ensure that you have an internet accessible git account that you can access.
 The example below uses github. 
@@ -284,14 +307,14 @@ git push -u origin main
 ==== Purpose
 
 The primary purpose of this lab is to introduce participants to the Red Hat Infrastructure Standard (or RHIS) and it components.
-We will do this by using RHIS to build the first RHIS component, Red Hat Identity Management.
+You will do this by using RHIS to build the first RHIS component, Red Hat Identity Management.
 
 Red Hat Identity Management (IdM) is the first of three pillars that supports a RHIS environment. 
 IdM provides RHIS with the core services necessary: Authentication and Authorization, Domain Name Services, and Certificate services. 
 Authentication services are provided via Kerberos (MIT Kerberos).
 Authorization services are controlled by the underlying LDAP implementation (389ds).
 Domain Name Services are provided through bind.
-Certificate Serivces are provide via the integrated CA (dogtag).
+Certificate Services are provide via the integrated CA (dogtag).
 
 image::idm-architecture.svg[IdM Architecture]
 
@@ -311,17 +334,17 @@ _kerberos-master._tcp      SRV     0 100 88 idm1.example.local.
                            SRV     0 100 88 idm2.example.local.
 ```
 
-However, if we have another idm service in the same domain, or an Active Directory service in the same domain...
+However, if you have another idm service in the same domain, or an Active Directory service in the same domain...
 
 ```
 _kerberos-master._tcp     SRV     0 100 88 idm1.example.local.
                           SRV     0 100 88 idm2.example.local.
-                          SRV     0 100 88 addc1.example.local.
-                          SRV     0 100 88 addc2.example.local.
+                          SRV     0 100 88 ad1.example.local.
+                          SRV     0 100 88 ad2.example.local.
 ```
 All is no longer well with the world.
-Now we end up with the same SRV record pointing to systems that maintain 2 different services. 
-Roughly 50% of the time we will get authentication/lookup failures because we are querying 2 different data sources.
+Now you end up with the same SRV record pointing to systems that maintain 2 different services. 
+Roughly 50% of the time you will get authentication/lookup failures because requests are querying 2 different data sources.
 
 
 ----
@@ -330,10 +353,11 @@ Customers typically implement something like example.local for the main domain a
 AD deployments have been the standard for years. 
 The IdM deployment typically becomes a subdomain like linux.example.local.
 The example.local domain then delegates / forwards requests to linux.example.local. 
-We can use many methodologies to manage migrations to a sub domain.
+You can use many methodologies to manage migrations to a sub domain.
 ----
 
-In our lab we will be implementing a simple flat model without delegation.
+In your lab you will be implementing a simple flat model without delegation.
 As stated the purpose in the lab is to understand how the automation works for day 1 and day 2 operations vs. all the configuration possibilities of IdM.
 The rhis-builder project will support any allowable IdM configuration.
 
+**Proceed to Module 2**

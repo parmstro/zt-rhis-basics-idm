@@ -5,11 +5,11 @@
 **The rhis-builder-inventory**
 
 The rhis-builder-inventory repository in github defines the structure and default configuration for an RHIS environment.
-We make a disconnected copy of this repository for managing your own environments.
+You will make a disconnected copy of this repository for managing your own environments.
 The repository contains a reference architecture for an idealized deployment of a Red Hat Infrastructure.
 You are free to modify this in any way that you please. 
 The goal of the reference architecture is to show you how the products were intended to work together to manage your environment.
-The repository contains only configuration data (as tempates) and a small set of ansible plays to manipulate the configuation templates.
+The repository contains only configuration data (as templates) and a small set of ansible plays to manipulate the configuration templates.
 All of the code that builds and configures your environment based on the data resides in the rhis-provisioner container.
 The container reads the configuration and applies it to your lab environment.
 
@@ -21,25 +21,26 @@ A deployment typically consists of the following RHEL servers:
   - an Identity Management server
   - a Satellite server
   - an Ansible Automation Platform server
-In this lab we will only be creating the Identity Management server.
+In this lab you will only be creating the Identity Management server.
 
-A deployment is identified at a high level by the **inventory_basevars** file.
+A deployment is identified at a high level by the **inventory_basevars.yml** file.
 This is a configuration definition file written in YAML that defines the high level template variables used to create a deployment.
 The deployment itself is managed through the directories of configuration files under **inventory_templates**
 
 
 === Understanding RHIS inventory_basevars.yml file
 
-To create a deployment, we first make a copy of the sample inventory_basevars.yml file.
+To create a deployment, you first make a copy of the sample inventory_basevars.yml file.
 The recommended practice is to name this after your DNS domain that you will be managing.
 
-```
+[source,bash]
+----
 cd ~/rhis/rhis-builder-inventory/
 cp inventory_basevars.yml example.local_inventory_basevars.yml
-```
+----
 
-We will examine the new example.local_inventory_basevars.yml file a section at a time.
-
+You will examine the new example.local_inventory_basevars.yml file a section at a time.
+You will then make changes to the file after examination.
 Let's start. Most of these are self explanatory.
 
 ```
@@ -59,16 +60,18 @@ basevars_disconnected_domain: false
 ```
 
 basevars_global_domain_name sets the domain name for all systems within the deployment. 
-You will see in the inventory that we define server roles by shortname. 
-When we deploy, the standard is <shortname><#>.<basevars_global_domain_name>
+You will see in the inventory that the directories define server roles by a shortname representing the server role (e.g. idm). 
+When creating the deployment, the standard is <shortname><#>.<basevars_global_domain_name>
 e.g. idm1.example.local
 
 Next, is
 
+```
 basevars_disconnected_domain: false
+```
 
-We always need to create a connected environment first.
-We can reference an existing connected environment, however, it must have a properly configured satellite instance.
+You always need to create a connected environment first.
+You can reference an existing connected environment, however, it must have a properly configured satellite instance.
 
 The next section is fairly straightforward as well.
 
@@ -94,19 +97,26 @@ rhis_time_servers:
 ```
 
 The default_network and related variables define the network that your core rhis systems will exist in. 
-This is for your idm primary and replica systems, your satellite and ansible automation platform node.
-For this environment you can ignore bonded networks - this is for deploying bonded systems from satellite.
+This is for your idm primary and replica systems, your satellite and capsules, and ansible automation platform node.
+For this environment you can ignore bonded networks - this is for deploying bonded network systems from satellite.
 The rhis_primary_city, state, timezone and locale are only used in deploying users accounts to ease deployment for a single location.
-As we are deploying kerberos, rhis_time_servers defines the time servers necessary to keep IdM aligned.
+This is used as a simple example of how you can extend your templating.
+
+Accurate time keeping is required for kerberos authentication. 
+Virtual servers work best when they set their own time with chronyd.
+The sample defines the rhis_time_servers using the stock rhel pool and set the chronyd configuration on the IdM servers.
+In a production environment set these values to your time appliance addresses or other known good time source.
 
 **NOTE:** You can extend the basevars implementation to suite your own environment.
-This is one of the reasons we are making a copy of the repo vs. cloning.
+This is one of the reasons you are making a copy of the repo vs. cloning.
 
 **ATTENTION:** In this implementation of RHIS, as upstream templates change, merging newer features with customized configuration is manual.
-We are in the process of implementing a tailoring files solution so that you can isolate your changes and extensions.
+The RHIS team is in the process of implementing a tailoring files solution so that you can isolate your changes and extensions from the underlying stock templates.
 This will eventually allow you to consume all upstream changes without impacting your customizations.
 
-The next section is important for automating system deployment.
+The next section is important for automating system deployment with Satellite.
+You will not be deploying systems with Satellite in this lab.
+This is described here for completeness.
 
 ```
 basevars_default_baremetal_boot_disk: "/dev/nvme0n1"
@@ -115,26 +125,34 @@ basevars_default_virtual_boot_disk: "/dev/sda"
 basevars_default_virtual_root_disk: "/dev/sda"
 # basevars_default_virtual_boot_disk: "/dev/vda"   # e.g. for KVM deployments
 # basevars_default_virtual_root_disk: "/dev/vda"
+```
+These variables define the defaults for bare metal and virtual system builds for the bootdisk and rootdisk.
+This make provisioning setup in Satellite easier.
+Remember that you can always override these at buildtime/runtime.
 
+
+```
 rhis_aap_release_version: "2.6"
 rhis_satellite_release_version: "6.19"
 rhis_satellite_os_major_version: "9"
 ```
-These variables define the defaults for baremetal and virtual system builds for the bootdisk and rootdisk.
-This make provisioning steup in Satellite easier.
-Remember that you can always override these at buildtime/runtime.
-
 The rhis_ variables set our default deployment versions.
-These are what systems will get built for AAP and Satellite.
-We use RHEL9 for everything by default as Satellite only supports deployment on RHEL9. 
-When Satellite supports RHEL10, everything will move to RHEL10.
+When AAP and Satellite servers to added your build, these setting define the product release installed.
 
-The last section we will discuss is the RHIS system counts:
+Currently RHIS uses RHEL9 for all bootstrap deployments.
+When using building in your own environment, you can build your IdM servers with RHEL10 by customizing rhis-builder-bootstrap-init.
+Satellite must be RHEL9 at this point in time as it does not support deployment on RHEL10.
+When Satellite supports RHEL10, everything will move to RHEL10.
+Once Satellite is deployed in a RHIS environment you can use any supported OS for any of the components, including your AAP infrastructure.
+
+To allow you to create any supported architecture, the inventory_basevars.yml file allows you to define the number and type of each system that you would like in your environment.
+The **rhis_system_count** list defines these. 
+This is the default configuration provided in the repository.
 
 ```
 rhis_system_count:
   satellite: 1
-  capsule: 1
+  capsule: 0
   idm: 2
   gitea: 0
   logserver: 0
@@ -150,29 +168,41 @@ rhis_system_count:
   quay: 0
   ```
 
-This list defines the different RHIS system roles we can deploy.
-This list is extensible.
-The list defines the number of systems of each type you want to add to your deployment.
-There are limits. 
-The limits for each server type are listed in inventory_basevars_limits.yml.
-Exceeding a limit will generate and error on inventory update.
-The default counts for a test environment are presented above.
-We will only be deploying an IdM primary and replica, so when we edit ours, all values will be zero except idm which will be 2.
+This list defines the different RHIS system roles that you can deploy.
+The default list is configured to deploy a minimal RHIS environment with IdM, Satellite, AAP and nodes to run containers.
 
-You created a copy earlier. Now edit the file example.local_inventory_basevars.yml now and make these changes:
+There are limits to the number of servers of each type that can be deployed. 
+The limits for each server type are listed in **inventory_basevars_limits.yml**.
+Exceeding a limit for a given server type will generate an error on inventory update.
 
+Each element in the list represents a configuration directory listed under **inventory_templates/host_vars**.
+When the inventory_template is rendered to create a deployment, a copy of the configuration directory is created for each system requested.
+A directory under the deployment host_vars is created based on the pattern: 
+
+**<system_type><#>.<basevars_global_domain_name>**
+
+
+=== Editing the example.local_inventory_basevars.yml file
+
+Earlier you created a copy of the sample inventory_basevars.yml file. 
+Ensure that the copy of the file is called **example.local_inventory_basevars.yml**.
+For this portion, you can either use your favourite terminal editor or the VSCode editor.
+Now let's edit that copy and make these changes:
+
+Change the global domain name.
 ```
 # GLOBAL VARIABLES THAT APPLY TO ALL HOSTS
 basevars_global_domain_name: "example.local"
 ```
 
+Update the default network configuration.
 ```
 default_network: "192.168.0.0"
 default_network_prefix: "23"
 default_network_mask: "255.255.254.0"
 ```
 
-Set these values to your home town or something familiar
+Set these values to your home town or something familiar. 
 ```
 rhis_primary_city: "Hespeler"
 rhis_primary_state: "Ontario"
@@ -198,42 +228,83 @@ rhis_system_count:
   kvm_hypervisors: 0
   quadlet: 0
   quay: 0
-  ```
+```
+
+Make sure that you save your changes.
 
 === Understanding RHIS inventory_templates
 
 Examine the files under the inventory_templates directory.
 Do not modify any of the files at this time.
-You will see that the inventory_templates directory is layed out like a standard ansible inventory directory.
-We have all the recommended directories that you would expect.
-Under **inventory_templates/host_vars/idm** you will find all the files that we will copy to generate our idm deployment.
-You can examine these now.
+You will see that the inventory_templates directory is laid out like a standard ansible inventory directory.
+You can see that you have all the recommended directories that you would expect.
+Under **inventory_templates/host_vars/idm** you will find the configuration files that will be copied to generate your idm deployment.
+Examine these now.
 
-**These are the files that you will eventually edit.**
+Example: inventory_templates/host_vars/idm/host_groups.yml
+```
+---
+# This file defines the basic host groups.
+# If you are planning host groups this may be day 1 configuration
+# adding hosts to host groups is a deployment or registration time function
 
-**We try to never edit the deployment files directly.**
+idm_host_groups:
+  - name: "hg-production"
+    description: "Production Servers"
+  - name: "hg-qualification"
+    description: "Quality assurance and testing servers"
+  - name: "hg-development"
+    description: "Development and research servers"
+  - name: "hg-pipeline"
+    description: "Pipeline and build servers"
+  - name: "hg-satellite-primary-servers"
+    description: "Satellite Servers"
+  - name: "hg-satellite-capsule-servers"
+    description: "Satellite Capsule servers"
+  - name: "hg-aap-servers"
+    description: "Ansible Automation Platform Servers"
+  - name: "hg-container-hosts"
+    description: "Container Hosts for running standalone containers e.g. tang, discovery, etc.."
+  - name: "hg-webservers"
+    description: "Web Servers"
+```
+The above is a simple yaml description of the host_groups that are used in the IdM sample environment to define how systems are grouped for Host Based Access Control and other operations.
 
-We may do this to quickly test something while debugging, but we want to make sure that we edit our templates and regenerate the deployment.
-The templates are our source of truth.
+**These are the files that you will eventually edit to control your configuration.**
+
+In a gitOps model managing multiple deployments, you should always edit **templates**.
+The deployment is always generated.
+The templates are our source of truth. 
+**Try to never edit the deployment files directly.**
+
+<hr>
+**ASIDE:** Realistically, you may do this to quickly test something while debugging, but you want to make sure that you edit your templates and regenerate the deployment.
+But the templates are our source of truth.
 The deployment is always generated and meant to be overwritten.
+<hr>
 
 
 === Generating a deployment.
 
-Let's generate the first deployment.
-Now that you have editted your example.local_inventory_basevars.yml file we will use the inventory_update.sh helper script to launch our playbooks to create the deployment.
-On the provisioner or the terminal window in vscode. Run the following commands.
+Let's generate the example.local deployment.
+Now that you have edited your example.local_inventory_basevars.yml file you will use the inventory_update.sh helper script to launch our playbooks to create the deployment.
+The helper scripts are provided to avoid typing a lot of long ansible commands.
 
-```
+Using the provisioner tab or the terminal window in vscode. 
+Run the following commands as ansiblerunner.
+
+[source,bash]
+----
 cd /home/ansiblerunner/rhis/rhis-builder-inventory
 ./inventory_update.sh --basevars-file example.local_inventory_basevars.yml
-```
+----
 
-You will start to see the system generate the new deployment.
+This starts the generation of the example.local deployment.
+You should see something like this:
 
 ```
 [ansiblerunner@provisioner rhis]$ cd rhis-builder-inventory
-[ansiblerunner@provisioner rhis-builder-inventory]$ ./inventory_update.sh
+[ansiblerunner@provisioner rhis-builder-inventory]$ ./inventory_update.sh --basevars-file example.local_inventory_basevars.yml
 Executing inventory update.
 
 PLAY [Generate the new inventory from templates] *******************************
@@ -295,15 +366,18 @@ When the ansible play completes with no errors, then you can examine your deploy
 
 deployments/example.local/ 
 
-throught VSCode window.
+Use the VSCode window.
 
 Examine your deployment. 
 Note what directories where created. 
 Examine the some files to see if your basevars where included properly.
 
-What happens if you get it wrong!!
+What happens if you get it wrong??
+(E.g. you forgot to add the --basevars-file parameter to specify example.local_inventory_basevars.yml and it created a savage.test deployment!)
+
 Nothing.
-Just fix the config and run the ansible again!
+If you accidentally create a savage.test deployment you can simply delete the directory.
+If one of your parameters was incorrect...
+Just fix the config and run the helper script again!
 
-When you are finished, it is time to move to the next module.
-
+**When you are finished, it is time to move to the next module.**

@@ -1,42 +1,44 @@
-== Welcome to Module 3 - Creating our vault file and launching the container.
+== Welcome to Module 3 - Creating your vault file and launching the container.
 
-As you can imagine when building an environment such as RHIS, there are lots of secrets that need to be maintained that we do not want in our inventory.
-Since we are running ansible, there are a wide variety of secrets management tools that we can use to ensure that our data is safe.
-The simplest, especially if we are building an enviroment (almost) from scratch is to use Anisible's native vault capability. 
-In a brownfield environment we might make use of an existing facility.
+As you can imagine when building an environment such as RHIS, there are lots of secrets that need to be maintained that you do not want in our inventory.
+Since you are running ansible, there are a wide variety of secrets management tools that you can use to ensure that our data is safe.
+The simplest, especially if you are building an environment (almost) from scratch is to use Anisible's native vault capability. 
+In a brownfield environment, you might make use of an existing facility.
 
 
 === Creating a Vault File
 
-As part of the deployment creation process, we ensire that there is a vault directory and a vault_SAMPLES directory.
+As part of the deployment creation process, automation ensures that there is a vault directory and a vault_SAMPLES directory.
 If you examine the vault_SAMPLES directory you will find a README.md file and a rhis_builder_vault_SAMPLE.yml file.
 
 Use the provisioner terminal window or the vscode terminal window to create your vault file.
 Make a copy of the rhis_builder_vault_SAMPLE.yml file in the vault directory.
 
-```
+e.g. From the provisioner tab running as ansiblerunner.
+[source,bash]
+----
 cd /home/ansiblerunner/rhis/rhis-builder-inventory/deployments/example.local/vault_SAMPLES
 cp rhis_builder_vault_SAMPLE.yml ../vault/rhis_builder_vault.yml
-```
+----
 
 This file will become our definitive vault file. 
-This particular directory is never overwritten when we run inventory_update.sh
+This particular directory is never overwritten when you run inventory_update.sh
 Vault files are usually specific to the deployment you are creating and typically reside with the rendered configuration.
-
-
-=== Editing the vault file
 
 Currently the vault file is not encrypted. 
 This makes the file easier to edit in our VSCode environment. 
+
+Use the provisioner tab.
 You encrypt the file by running the following command:
 
-```
+[source,bash]
+----
 ansible-vault encrypt rhis_builder_vault.yml
-```
+----
 
 You will be prompted for a password and to verify the password. 
-We are doing it now on the initial copy so we don't lose anything valuable if we get it wrong.
-We can simply copy over it at this point.
+You are doing it now on the initial copy so you don't lose anything valuable if you get it wrong.
+You can simply copy over it at this point.
 
 If you look at the file in VSCode or in the terminal, you will see something like:
 
@@ -54,41 +56,66 @@ $ANSIBLE_VAULT;1.1;AES256
 ...
 ```
 
+=== Editing the vault file
+
+Again from the provisioner tab as ansiblerunner.
+
 You can edit the file at the commandline by using:
 
-```
+[source,bash]
+----
 ansible-vault edit rhis_builder_vault.yml
-```
+----
 
+This will launch your default terminal based editor.
+In our lab this should be vim.
 
+=== Alternate method of encrypting or decrypting. 
 There is a simple extension that you can add to your environment that will allow to encrypt and decrypt your vault file on demand with a mouse click.
 
-ansible-vault-inline dhoeric
+In VSCode select the Extensions "blocks" icon in the left edge ("blocks" icon 5th from the top) or press Ctrl+Shift+X.
+This will display a list from the Extensions: Marketplace.
+In the search window enter the following:
+
+[source]
+----
+Ansible Vault Inline Extended
+----
+
+Click on the blue "Install" button. 
 
 This extension allows you to create a vault variable file in a directory of your choice and then use the contained password to encrypt and decrypt your vault file.
-If you want to use this extention, you can install it easily
+If you want to use this extension, you can install it easily
 Then you need to create a vault.txt file to store you vault password. 
 
-```
+[source,bash]
+----
 mkdir ~/.ansible
 # edit and add your password as the only line in the file
 vim ~/.ansible/vault.txt
-```
+----
 
 Enter your password in the file and save.
 
-Now when you are on the VSCode pane, you can press Ctrl+Shift+P and type ansible..
-You will see Encrypt/Decrypt with ansible-inline
+1. Go back to the VSCode tab.
+2. Select the extensions (Ctrl+Shift+X) and select the Ansible Vault Inline Extended extension.
+3. There is a Gear Icon in the lower right corner of the item. 
+4. Click the gear and select Settings.
+5. In the resulting dialog box, enter the path to your vault.txt file
+6. Exit the dialog.
+
+You should now be able to right click on yaml or json file and encrypt/decrypt it on demand.
+You will see Encrypt/Decrypt with ansible-inline.
 Selecting it will toggle your encrypted file from encrypted to decrypted and back.
 It will also start to stay in the top position so that you can just press Enter to execute.
 This make life easier.
 
 OK time to edit some vault variables.
 
-There is a lot to the vault file but we will limit our focus for now.
+There is a lot to the vault file but the instructions will limit focus to the relevant variables for this lab.
 The file has been designed for a production environment where every password or secret entry needs to have its own unique value.
-For labs and POCs this can be difficult to absorb with all the other concepts that we are working with.
-To make it easier to get started, we declare some defaults and then use that value to propagate to all the other like variables in the file.
+For labs and POCs it can be difficult to absorb with all the other concepts that you are working with.
+To make it easier to get started, the sample vault file declares defaults and references that value to propagate it other like variables in the file.
 
 
 The first default you find is our provisioning user. 
@@ -98,7 +125,7 @@ Don't change this.
 rhis_builder_default_user: "ansiblerunner"
 ```
 
-Next we start using that default user:
+Next the configuration starts using that default user:
 
 ```
 # at line 28
@@ -107,6 +134,7 @@ default_environment_password_vault: "eyJhbGciOiJIUz"
 ```
 
 Change the default_environment_password_vault to **rhisfromscratch**.
+
 The section in the file should look like this:
 
 ```
@@ -116,14 +144,14 @@ default_environment_password_vault: "rhisfromscratch"
 
 The default_admin_username_vault is set to **"admin"** at around line 34.
 IdM, Satellite and AAP installers all expect an admin user by default.
-For production environments, these are typically disabled or changed after deploymentn, but for now we will leave this as is.
+For production environments, these are typically disabled or changed after deployment, but for now you will leave this as is.
 
 
-Then next setup of variables we need to look at are these:
+Then next set of variables you need to review are below.
 These values are used to connect your rhis servers to the CDN to get content.
 You only need these for the so called "bootstrap" servers in the RHIS environment.
 Once a satellite server is up, your environment gets all its content from Satellite.
-
+You will not change the values in this lab because you are working with systems that are bootstrapped already.
 
 ```
 # at line 61 or so..
@@ -133,7 +161,7 @@ default_activation_key_vault: "rhis-builder"
 
 Your instructor will provide you with a temporary number and activation key to use for this exercise.
 
-For this lab the last section that we need to update starts at line 160.
+The last section that you need to review for IdM starts at line 160.
 This is the Identity Management section;
 
 ```
@@ -159,28 +187,29 @@ ipa_principal_password_vault: "{{ ipa_admin_password_vault }}"
 # for creating kvm services
 # kvm_ssl_rsa_key_pass_vault: "{{ default_environment_password_vault }}"
 ```
+In production, this is where you would set unique values for identity management secrets.
+You really don't have to change anything here for the lab. 
 
-We really don't have to change anything here for the lab. 
-In production, this is where we would set unique values for identity management secrets.
 
 In IdM, an identity is called a principal. 
 The admin principal is admin.
-We will use the default environment passphrase for our lab. 
+You will use the default environment passphrase for our lab. 
 
 **ipa_dm_password_vault** is a CRITICAL password. 
 This is the "Directory Manager" password and is essentially root for the IdM installation. 
 This is one of the reasons this file should always be encrypted in a secure location with very limited access.
 In production, you can even keep this in a separate vault file with highly restricted access.
 You can deploy it from a secure location at run time and delete the vaulted file after completetion.
+
 Ansible secrets are protect by 
 
-no_log: true 
+**no_log: true**
 
-within our code so that we do not leak secrets in log files or ansible output.
+within the code so that execution does not leak secrets in log files or ansible output.
 
-ipa_default_user_password_vault is used as a convienence for users we provision during configuration.
+ipa_default_user_password_vault is used as a convenience for users that you provision during configuration.
 
-Notice that we have this:
+Notice that you have this configuration in the vault file:
 
 ```
 ipa_principal_username_vault: "{{ ipa_admin_principal_vault }}"
@@ -188,9 +217,9 @@ ipa_principal_password_vault: "{{ ipa_admin_password_vault }}"
 ```
 These lines never really change.
 They exist to abstract the variability in some collection implementations away from the user. 
-You only set ipa_admin_principal_vault and ipa_admin_password_vault, and any code implemenation differences are handled for you.
+You only set ipa_admin_principal_vault and ipa_admin_password_vault, and any code implementation differences are handled for you.
 
-I know that there are many other variables in this file, however, as we are only deploying IdM in this lab, we will not set them or discuss them.
+There are many other variables in this file, however, as you are only deploying IdM in this lab, you will not set them or discuss them.
 
 Save and encrypt your vault file.
 
@@ -198,63 +227,11 @@ Save and encrypt your vault file.
 === Launching the container
 
 The user ansiblerunner will perform all our work.
-To make life easy, we will set up some ssh keys.
-Run ssh-keygen and create a passwordless ssh key.
+SSH keys have been created as part of the bootstrap process and copied to all the lab hosts.
+This is done as a normal part of bootstrapping in an RHIS environment.
+This is only necessary for the bootstrap hosts.
 
-```
-ssh-keygen -t ed25519
-Generating public/private ed25519 key pair.
-Enter file in which to save the key (/home/ansiblerunner/.ssh/id_ed25519): 
-Enter passphrase (empty for no passphrase): 
-Enter same passphrase again: 
-Your identification has been saved in /home/ansiblerunner/.ssh/id_ed25519
-Your public key has been saved in /home/ansiblerunner/.ssh/id_ed25519.pub
-The key fingerprint is:
-SHA256:kuxrgrxb5LX740aISm80Ij/Lhkr7JCTaPuh5dKODZnM ansiblerunner@provisioner.example.local
-The key's randomart image is:
-+--[ED25519 256]--+
-|                 |
-|                 |
-|                 |
-|     . .         |
-|..  ..=.S        |
-|=.o++=.o.        |
-|.X+B=.+.         |
-|+B&E+ .oo        |
-|*=@O.oo+o.       |
-+----[SHA256]-----+
-```
-
-Copy the key to our idm1.example.local and idm2.example.local servers using ssh-copy-id.
-```
-ssh-copy-id -i ~/.ssh/id_ed25519.pub ansiblerunner@idm1.example.local
-
-ssh-copy-id -i ~/.ssh/id_ed25519.pub ansiblerunner@idm2.example.local
-```
-
-**NOTE: FOR SSC LAB only**
-We will unsubscribe and resubscribe our idm1 and idm2 systems
-Use the provisioner tab
-
-```
-ssh idm1.example.local
-subscription-manager unregister
-cp /etc/rhsm/rhsm.conf /etc/rhsm/rhsm.conf.rhdp
-cp /etc/rhsm/rhsm.conf.kat-backup /etc/rhsm.conf
-
-subscription-manager register --org <instructor_provided> --activationkey <instructor_provided>
-
-
-ssh idm1.example.local
-subscription-manager unregister
-cp /etc/rhsm/rhsm.conf /etc/rhsm/rhsm.conf.rhdp
-cp /etc/rhsm/rhsm.conf.kat-backup /etc/rhsm.conf
-
-subscription-manager register --org <instructor_provided> --activationkey <instructor_provided>
-```
-
-
-Part of the work that was done when we ran the inventory_update.sh help script was to create a helper script for launching our container.
+Part of the work that was done when you ran the inventory_update.sh help script was to create a helper script for launching our container.
 This provides us with a short command versus typing out a long ansible-playbook or navigator command.
 The script is named after your deployment.
 
@@ -297,7 +274,6 @@ Minimum AAP Version: 2.5
 RHIS Schema Version: 1.0.0
 ```
 
-This shows you the configuration of the provisioner, all of the directories it has mounted and provides detailed information about the build of RHIS we are using.
+This shows you the configuration of the provisioner, all of the directories it has mounted and provides detailed information about the build of RHIS you are using.
 
-Next we will use the container to deploy the IdM Primary.
-
+Next you will use the container to deploy the IdM Primary.
