@@ -1,4 +1,125 @@
 == Welcome to Module 4
 
+In this module you will run the play that installs and configures your IdM Primary.
+For this configuration there is no real difference between and IdM Primary and an IdM Replica.
+They end up being identical deployments. 
+The only real difference is order of operations.
+As you continue to configure roles, as an example, Active Directory Trusts, there are steps to take to maintain symmetry.
+More on that later.
+
+=== The model for the build
+
+A mentioned in the introduction, RHIS was designed to be capable of building an entire Red Hat Infrastructure from zero implementation.
+This is the primary reason for the rhis-provisioner container.
+The container delivers all the binary dependencies, python dependencies, ansible collections and ansible code needed in a self contained package.
+This minimizes the setup required to get started.
+
+It is assumed that Ansible Automation Platform does not exist.
+All the Day 1 build operations are performed via the container.
+Once we have "Bootstrapped" the environment, AAP can take over and build out the remainder of the environment.
+
+By bootstrap, we mean creating your Provisioner node, then creating an IdM Primary and a Satellite Primary. 
+If IdM, Satellite, or AAP already exist, rhis-provisioner configuration can adjust to this and add only the portions that are needed.
+We still run the initial steps from the provisioner. 
+
+
 === Building the IdM Primary
-Examining the Build
+
+In this section you will execute commands from inside the rhis-provisioner container.
+You can launch the container from a VSCode terminal window or from the provisioner terminal window tab.
+It can be useful to run the container from the provisioner terminal to provide you with more screen real estate to view output.
+
+**Remember:** You can edit *existing* files and have the container see the changes.
+If you create *new* files, you will need to stop and restart the container to see access the new files.
+
+From the provisioner tab, ensure you are logged in as ansiblerunner.
+If you are not, execute the following:
+
+[source, bash]
+----
+su - ansiblerunner
+----
+
+Navigate to the rhis-builder-inventory directory and launch the container using the helper script.
+
+[source, bash]
+----
+cd /home/ansiblerunner/rhis/rhis-builder-inventory
+./example.local.25.sh
+----
+
+You should now see the following:
+
+```
+....
+Launching the rhis-provisioner container with the following parameters:
+external-tasks-dir: /home/ansiblerunner/rhis/rhis-builder-inventory/deployments/example.local/external_tasks
+files-dir: /home/ansiblerunner/rhis/rhis-builder-inventory/deployments/example.local/files
+group-vars-dir: /home/ansiblerunner/rhis/rhis-builder-inventory/deployments/example.local/group_vars
+host-vars-dir: /home/ansiblerunner/rhis/rhis-builder-inventory/deployments/example.local/host_vars
+inventory-dir: /home/ansiblerunner/rhis/rhis-builder-inventory/deployments/example.local/inventory
+logs-dir: /home/ansiblerunner/rhis/rhis-builder-inventory/deployments/example.local/logs
+secrets-dir: /home/ansiblerunner/rhis/rhis-builder-inventory/deployments/example.local/vault
+ssh-dir: /home/ansiblerunner/.ssh
+transfer-dir: /home/ansiblerunner/rhis_transfer
+templates-dir: /home/ansiblerunner/rhis/rhis-builder-inventory/deployments/example.local/templates
+vars-dir: /home/ansiblerunner/rhis/rhis-builder-inventory/deployments/example.local/vars
+ansible-ver: 2.5
+registry: quay.io
+repo: parmstro
+tag: latest
+NOTE: files added to any of the directories will not be accessible.
+      You must restart the container to access new files
+Mounting custom configuration
+##########################################
+Welcome to the RHIS Provisioner container!
+RHIS Build: aniyu
+Provisioner Version: 1.0.148
+From Base Version: 1.0.30
+Minimum AAP Version: 2.5
+RHIS Schema Version: 1.0.0
+[root@provisioner rhis]# 
+```
+
+For this lab the minimum Provisioner version listed in the container output should be 
+
+```
+Provisioner Version: 1.0.148
+From Base Version: 1.0.30
+```
+
+The provisioner version is alway linked to the Base Version from which it was built.
+As you can see from the output, your deployment inventory has been mounted and your configuration is available to the roles in the container.
+
+To build the IdM Primary is very simple.
+Run the build_idm_primary helper script to launch the ansible playbook.
+Again, the helper scripts reduce typing and possible errors.
+
+At the command prompt in the container, issue the following commands:
+
+[source, bash]
+----
+cd rhis-builder-idm
+./build_idm_primary.sh
+----
+
+```
+
+```
+
+You will be prompted for the ssh password for the default user.
+Enter the password for ansiblerunner
+You will then be prompted for the vault password for the files in your vault directory.
+Enter the password that you used to encrypt rhis_builder_vault.yml
+
+When you press Enter, the build will start.
+The build takes approximately 20 minutes.
+If you are interested in the process, please follow the output in the terminal.
+We also create logs of the deployment in the logs directory.
+
+```
+
+
+
+
+=== Examining the Build

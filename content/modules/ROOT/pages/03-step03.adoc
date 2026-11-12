@@ -1,7 +1,7 @@
 == Welcome to Module 3 - Creating your vault file and launching the container.
 
-As you can imagine when building an environment such as RHIS, there are lots of secrets that need to be maintained that you do not want in our inventory.
-Since you are running ansible, there are a wide variety of secrets management tools that you can use to ensure that our data is safe.
+As you can imagine when building an environment such as RHIS, there are lots of secrets that need to be maintained that you do not want in your inventory.
+Since you are running ansible, there are a wide variety of secrets management tools that you can use to ensure that your data is safe.
 The simplest, especially if you are building an environment (almost) from scratch is to use Anisible's native vault capability. 
 In a brownfield environment, you might make use of an existing facility.
 
@@ -24,12 +24,12 @@ cp rhis_builder_vault_SAMPLE.yml ../vault/rhis_builder_vault.yml
 cd /home/ansiblerunner/rhis/rhis-builder-inventory/deployments/example.local/vault 
 ----
 
-This file will become our definitive vault file. 
+This file will become your definitive vault file. 
 This particular directory is never overwritten when you run inventory_update.sh
 Vault files are usually specific to the deployment you are creating and typically reside with the rendered configuration.
 
 Currently the vault file is not encrypted. 
-This makes the file easier to edit in our VSCode environment. 
+This makes the file easier to edit in your VSCode environment. 
 
 Use the provisioner tab.
 You encrypt the file by running the following command:
@@ -80,7 +80,7 @@ ansible-vault edit rhis_builder_vault.yml
 ----
 
 This will launch your default terminal based editor.
-In our lab this should be vim.
+In your lab this should be vim.
 
 === Alternate method of encrypting or decrypting. 
 There is a simple extension that you can add to your environment that will allow to encrypt and decrypt your vault file on demand with a mouse click.
@@ -130,7 +130,7 @@ For labs and POCs it can be difficult to absorb with all the other concepts that
 To make it easier to get started, the sample vault file declares defaults and references that value to propagate it other like variables in the file.
 
 
-The first default you find is our provisioning user. 
+The first default you find is your provisioning user. 
 Don't change this.
 
 ```
@@ -205,7 +205,7 @@ You really don't have to change anything here for the lab.
 
 In IdM, an identity is called a principal. 
 The admin principal is admin.
-You will use the default environment passphrase for our lab. 
+You will use the default environment passphrase for your lab. 
 
 **ipa_dm_password_vault** is a CRITICAL password. 
 This is the "Directory Manager" password and is essentially root for the IdM installation. 
@@ -238,12 +238,12 @@ Save and encrypt your vault file.
 
 === Launching the container
 
-The user ansiblerunner will perform all our work.
+The user ansiblerunner will perform all your work.
 SSH keys have been created as part of the bootstrap process and copied to all the lab hosts.
 This is done as a normal part of bootstrapping in an RHIS environment.
 This is only necessary for the bootstrap hosts.
 
-Part of the work that was done when you ran the inventory_update.sh help script was to create a helper script for launching our container.
+Part of the work that was done when you ran the inventory_update.sh help script was to create a helper script for launching your container.
 This provides us with a short command versus typing out a long ansible-playbook or navigator command.
 The script is named after your deployment.
 

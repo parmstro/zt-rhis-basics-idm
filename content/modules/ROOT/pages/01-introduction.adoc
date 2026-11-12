@@ -27,27 +27,54 @@ echo "I copied this text using the copy button here >>>"
 
 Expected output from commands in the terminal window are also displayed as code.
 
-With that, let’s look at our environment.
+With that, let’s look start with some background information. 
 
-==== Environment
+==== A typical Red Hat Infrastructure Standard (RHIS) Bootstrap Environment
 
-The lab environment will consist of the following systems:
+A RHIS bootstrap environment typically consists of the following systems:
+
+* 1 x RHIS provisioner node - provisioner
+* 1 x Red Hat Identity Management (IdM) Primary server - idm1
+* 1 x Red Hat Satellite primary server - satellite1
+
+image::rhis-bootstrap.svg[Typical RHIS Bootstrap Environment]
+
+==== Background
+
+The Red Hat Infrastructure Standard (RHIS) was created to provide an opinionated design for the deployment of a Red Hat Enterprise Linux platform using Red Hat tooling.
+The goal is to demonstrate how each component is intended to be used and how they fit together to provide an integrated experience.
+The rhis-builder project is the ansible based code and configuration templates designed to implement the RHIS architecture.
+
+RHIS uses a multi node bootstrap model.
+A typical full deployment of RHIS uses a Provisioner Node, an Identity Management (IdM) Primary node, and a Satellite Primary node.
+In any Red Hat Demonstration Platform (RHDP) lab for RHIS, the bootstrap portion of the process will be completed for you.
+In your environment, you can use any method you choose to create the 3 nodes. 
+The project offers a repository call rhis-builder-bootstrap-init that will create kickstart files (ks.cfg) and related OEMDRV isos for deployment of the 3 systems.
+These can be used to kickstart bare metal, virtual machines or create cloud images. 
+If you are using a cloud provider, you can use any minimal RHEL 9 image for the IdM primary and Satellite primary nodes.
+The provisioner node needs some basic package installation. 
+A preparation playbook exists in the bootstrap project to initialize the provisioner.
+
+In this lab we are focusing on IdM only so we won't have a Satellite in the environment.
+
+==== The Lab Environment
+
+A lab environment in this session consists of the following systems:
 
 * 1 x RHIS provisioner node - provisioner
 * 1 x Red Hat Identity Management (IdM) Primary server - idm1
 * 1 x Red Hat Identity Management (IdM) Replica server - idm2
-* 2 x IdM clients - client1, client2
+* 2 x RHEL systems to function as clients - client1 and client2
 
-image::lab-environment.svg[Lab Environment]
 
-This is a RHIS automation lab, as with all RHIS automation labs, the vast majority of our work will be done from the provisioner node.
-The provisioner node will store our yaml inventory files for configuring the environment.
+This is a RHIS automation lab, as with all RHIS automation labs, the vast majority of your work will be done from the provisioner node.
+The provisioner node will store your yaml inventory files for configuring the environment.
 It will also house the rhis-provisioner container. 
-You will launch the rhis-provisioner container and run our commands via ansible "wrapper" scripts for ease of use.
+You will launch the rhis-provisioner container and run your commands via ansible "wrapper" scripts for ease of use.
 
-When working with IdM directly to understand our environment, you can consider an IdM Primary server and an IdM Replica server to be identical, the only difference being the order of installation. 
+When working with IdM directly to understand your environment, you can consider an IdM Primary server and an IdM Replica server to be identical, the only difference being the order of installation. 
 In more sophisticated installations, you can configure servers to perform different roles to streamline Identity Management processing and operational workflow.
-For our first environment, the will be identical to support full redundancy of services as you have only 2 systems. 
+For your first environment, they will be identical to support full redundancy of services as you have only 2 systems. 
 Identity Management environments can support as many as 64 replicas in a mesh-like configuration. 
 Services may be distributed to optimize replication.
 
@@ -87,21 +114,34 @@ You ensure that this container is scanned for issues and vulnerabilities, genera
 The container is launched and mounts the inventory repo to get its configuration.
 
 The rhis-builder-inventory repo contains all the templates used to build your deployments and the code to generate those deployments.
-You will download a copy of the repository and then examine the components, the elements that you need to change to customize our configuration and generate our deployment.
+You will download a copy of the repository and then examine the components, the elements that you need to change to customize your configuration and generate your deployment.
 
 If you want to save your work from this session, you will need to configure a git remote after you pull the project down.
 You will notice that the contents are copied rather than forking the repository. 
-This is because the resulting repository is fully yours to control, you don't want to merge or push any of your changes to our public repository.
+This is because the resulting repository is fully yours to control, you don't want to merge or push any of your changes to your public repository.
 
 **IMPORTANT:** ALL configuration in the repository is fictitious. DO NOT ADD ANY CORPORATE OR PERSONALLY IDENTIFYING DATA. 
 
 These steps allow you to get the content and create a local git repository.
 
 **Run these steps on the provisioner node as the ansiblerunner user in the ansiblerunner home directory.**
+You can execute commands from a VSCode terminal window or from the provisioner terminal window tab.
+The choice is yours.
+Using VSCode you can see everything in one tab.
+It can be useful, however, to run commands from the provisioner terminal to provide you with more screen real estate to view output.
+The directions below will work from either terminal, but are written assuming using the provisioner terminal tab.
+
+From the provisioner tab, ensure you are logged in as ansiblerunner.
+If you are not, execute the following:
+
+[source, bash]
+----
+su - ansiblerunner
+----
 
 [source,bash]
 ----
-cd rhis
+cd /home/ansiblerunner/rhis
 wget https://github.com/parmstro/rhis-builder-inventory/archive/refs/heads/main.zip
 unzip main.zip
 mv rhis-builder-inventory-main rhis-builder-inventory   # rename it for convenience
@@ -236,7 +276,7 @@ There is a help script for this in the root of the rhis-builder-inventory reposi
 
 [source,bash]
 ----
-cd ~/rhis/rhis-builder-inventory
+cd /home/ansiblerunner/rhis/rhis-builder-inventory
 ./update_containers.sh
 ----
 

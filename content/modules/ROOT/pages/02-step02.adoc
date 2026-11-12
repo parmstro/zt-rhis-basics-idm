@@ -136,7 +136,7 @@ rhis_aap_release_version: "2.6"
 rhis_satellite_release_version: "6.19"
 rhis_satellite_os_major_version: "9"
 ```
-The rhis_ variables set our default deployment versions.
+The rhis_ variables set your default deployment versions.
 When AAP and Satellite servers to added your build, these setting define the product release installed.
 
 Currently RHIS uses RHEL9 for all bootstrap deployments.
@@ -274,12 +274,12 @@ The above is a simple yaml description of the host_groups that are used in the I
 
 In a gitOps model managing multiple deployments, you should always edit **templates**.
 The deployment is always generated.
-The templates are our source of truth. 
+The templates are your source of truth. 
 **Try to never edit the deployment files directly.**
 
 '''
 **ASIDE:** Realistically, you may do this to quickly test something while debugging, but you want to make sure that you edit your templates and regenerate the deployment.
-But the templates are our source of truth.
+But the templates are your source of truth.
 The deployment is always generated and meant to be overwritten.
 
 '''
@@ -288,7 +288,7 @@ The deployment is always generated and meant to be overwritten.
 === Generating a deployment.
 
 Let's generate the example.local deployment.
-Now that you have edited your example.local_inventory_basevars.yml file you will use the inventory_update.sh helper script to launch our playbooks to create the deployment.
+Now that you have edited your example.local_inventory_basevars.yml file you will use the inventory_update.sh helper script to launch your playbooks to create the deployment.
 The helper scripts are provided to avoid typing a lot of long ansible commands.
 
 Using the provisioner tab or the terminal window in vscode. 

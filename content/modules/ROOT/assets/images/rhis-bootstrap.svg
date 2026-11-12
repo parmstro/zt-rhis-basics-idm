@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-14 0 564 395" width="564" height="395" font-family="IBM Plex Sans, system-ui, -apple-system, Segoe UI, sans-serif" role="img"
+     aria-label="Bootstrap media sits on the left: an OEMDRV kickstart configuration volume above and a RHEL DVD operating system installer below. The RHIS infrastructure band on the right contains three stacked servers — the Provisioner running rhis-builder at the top, an IdM Primary providing identity services drawn in blue in the middle, and a Satellite Primary providing content management drawn in amber at the bottom carrying a chain icon because it is syncable. A dashed configure arrow runs from the OEMDRV volume rightward into the infrastructure band, and a solid install arrow runs from the RHEL DVD rightward into the same band, showing that all three servers are installed and configured from the bootstrap media. Inside the band, a dashed deploy arrow descends from the Provisioner to the IdM Primary, and a second dashed deploy arrow routes down the right side of the band from the Provisioner to the Satellite Primary, showing that the Provisioner orchestrates the deployment of both. The Red Hat CDN sits at the top. A solid sync arrow routes from the CDN along the right margin and into the Satellite Primary, showing that content flows from the CDN into Satellite after the bootstrap is complete.">
+
+<!-- ===== BEGIN PASCAL HEAD (verbatim from assets/pascal-head.svg) ===== -->
+<style>
+  :root {
+    --bg: #f2f2f2;
+    --fg: #151515;
+    --muted: #4d4d4d;
+    --line: #c7c7c7;
+    --box: #ffffff;
+    --band: #e0e0e0;
+    --accent: #ee0000;
+    --accent-soft: #fce3e3;
+    --dev: #0066cc;
+    --bld: #f5921b;
+    --prd: #5e40be;
+    --lib: #37a3a3;
+    --font: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #151515;
+      --fg: #e0e0e0;
+      --muted: #a3a3a3;
+      --line: #383838;
+      --box: #292929;
+      --band: #1f1f1f;
+      --accent: #f56e6e;
+      --accent-soft: #3f0000;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #151515;
+    --fg: #e0e0e0;
+    --muted: #a3a3a3;
+    --line: #383838;
+    --box: #292929;
+    --band: #1f1f1f;
+    --accent: #f56e6e;
+    --accent-soft: #3f0000;
+    color-scheme: dark;
+  }
+
+  svg { background: var(--bg); }
+  .band { fill: var(--band); }
+  .box { fill: var(--box); stroke: var(--line); stroke-width: 1.25; }
+  .hc { fill: var(--band); stroke: var(--line); stroke-width: 1.25; }
+  .chip { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1; }
+  .env-lib { fill: color-mix(in srgb, var(--lib) 22%, var(--box)); stroke: var(--lib); stroke-width: 2; }
+  .env-dev { fill: color-mix(in srgb, var(--dev) 20%, var(--box)); stroke: var(--dev); stroke-width: 2; }
+  .env-bld { fill: color-mix(in srgb, var(--bld) 20%, var(--box)); stroke: var(--bld); stroke-width: 2; }
+  .env-prd { fill: color-mix(in srgb, var(--prd) 20%, var(--box)); stroke: var(--prd); stroke-width: 2; }
+  .clk { fill: none; stroke: var(--fg); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .sheet { fill: var(--box); stroke: var(--line); stroke-width: 1.5; stroke-linejoin: round; }
+  .rule { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .lk { fill: none; stroke: var(--accent); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+  .ky { fill: none; stroke: var(--muted); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+  .t { fill: var(--fg); font-size: 13px; }
+  .tb { fill: var(--fg); font-size: 13px; font-weight: 600; }
+  .tm { fill: var(--muted); font-size: 12px; }
+  .tc { fill: var(--fg); font-size: 12px; font-weight: 500; }
+  .tv { fill: var(--accent); font-size: 12.5px; font-weight: 600; }
+  .cap { fill: var(--muted); font-size: 10.5px; letter-spacing: .09em; font-weight: 600; text-transform: uppercase; }
+  .arr { fill: none; stroke: var(--accent); stroke-width: 2; marker-end: url(#ah); }
+  .arr-s { fill: none; stroke: var(--accent); stroke-width: 1.5; marker-end: url(#ah); }
+  .cfg { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 5 4; marker-end: url(#ahc); }
+  .ah { fill: var(--accent); }
+  .ahc { fill: var(--muted); }
+</style>
+<defs>
+  <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto">
+    <path class="ah" d="M0 0 L10 5 L0 10 z"/>
+  </marker>
+  <marker id="ahc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto">
+    <path class="ahc" d="M0 0 L10 5 L0 10 z"/>
+  </marker>
+  <symbol id="link" viewBox="0 0 24 24">
+    <path class="lk" d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+    <path class="lk" d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+  </symbol>
+</defs>
+<!-- ===== END PASCAL HEAD ===== -->
+
+  <!-- CDN: the external upstream content source that Satellite syncs from after bootstrap -->
+  <rect class="box" x="180" y="10" width="140" height="36" rx="6"/>
+  <text class="tb" x="250" y="33" text-anchor="middle">Red Hat CDN</text>
+
+  <!-- Bootstrap media: the two ISO volumes that install and configure all RHIS servers -->
+  <text class="cap" x="20" y="80">Bootstrap media</text>
+
+  <rect class="box" x="20" y="92" width="160" height="52" rx="6"/>
+  <text class="tb" x="100" y="114" text-anchor="middle">OEMDRV Volume</text>
+  <text class="tm" x="100" y="130" text-anchor="middle">Kickstart config</text>
+
+  <rect class="box" x="20" y="172" width="160" height="52" rx="6"/>
+  <text class="tb" x="100" y="194" text-anchor="middle">RHEL DVD</text>
+  <text class="tm" x="100" y="210" text-anchor="middle">OS installer</text>
+
+  <!-- RHIS Infrastructure: the Provisioner, IdM and Satellite are all part of this environment -->
+  <text class="cap" x="258" y="80">RHIS infrastructure</text>
+  <rect class="band" x="258" y="92" width="228" height="252" rx="8"/>
+
+  <!-- Provisioner: bootstrapped first, then orchestrates deployment of IdM and Satellite -->
+  <rect class="box" x="271" y="104" width="176" height="52" rx="6"/>
+  <text class="tb" x="359" y="126" text-anchor="middle">Provisioner</text>
+  <text class="tm" x="359" y="142" text-anchor="middle">rhis-builder</text>
+
+  <!-- IdM Primary: deployed second, provides identity services to the domain -->
+  <rect class="box env-dev" x="271" y="192" width="176" height="52" rx="6"/>
+  <text class="tb" x="359" y="214" text-anchor="middle">IdM Primary</text>
+  <text class="tm" x="359" y="230" text-anchor="middle">Identity services</text>
+
+  <!-- Satellite Primary: deployed last, syncs content from the CDN and serves the environment -->
+  <rect class="box env-bld" x="271" y="280" width="176" height="52" rx="6"/>
+  <use href="#link" x="284" y="284" width="14" height="14"/>
+  <text class="tb" x="359" y="302" text-anchor="middle">Satellite Primary</text>
+  <text class="tm" x="359" y="318" text-anchor="middle">Content management</text>
+
+  <!-- Legend: only the idioms this diagram uses -->
+  <path class="arr-s" d="M30 375 H62"/>
+  <text class="tm" x="70" y="379">content</text>
+  <path class="cfg" d="M160 375 H192"/>
+  <text class="tm" x="200" y="379">settings</text>
+  <use href="#link" x="290" y="368" width="14" height="14"/>
+  <text class="tm" x="312" y="379">syncable</text>
+
+  <!-- DRAWN LAST: arrows whose heads land on bands or boxes, painted after them so arrowheads stay visible -->
+
+  <!-- configure: OEMDRV kickstart data drives automated installation of all servers in the band -->
+  <path class="cfg" d="M180 118 H258"/>
+  <text class="tm" x="200" y="110" style="font-weight:600">configure</text>
+
+  <!-- install: RHEL DVD provides OS packages to all servers in the band -->
+  <path class="arr" d="M180 198 H258"/>
+  <text class="tv" x="200" y="190">install</text>
+
+  <!-- deploy: Provisioner uses rhis-builder to set up IdM Primary -->
+  <path class="cfg" d="M359 156 V192"/>
+  <text class="tm" x="369" y="178" style="font-weight:600">deploy</text>
+
+  <!-- deploy: Provisioner uses rhis-builder to set up Satellite Primary, routed down the right side to skip IdM -->
+  <path class="cfg" style="marker-end:none; stroke-linejoin:round" d="M447 130 H462 V306"/>
+  <path class="cfg" d="M462 306 H447"/>
+  <text class="tm" x="466" y="230" style="font-weight:600">deploy</text>
+
+  <!-- sync: content flows from the CDN into Satellite after bootstrap, routed down the right margin -->
+  <path class="arr" style="marker-end:none; stroke-linejoin:round" d="M320 28 H516 V296"/>
+  <path class="arr" d="M516 296 H486"/>
+  <text class="tv" x="522" y="170">sync</text>
+
+</svg>
