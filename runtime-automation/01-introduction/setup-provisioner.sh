@@ -4,7 +4,7 @@ LAB_USER="ansiblerunner"
 LAB_HOME="/home/${LAB_USER}"
 
 echo "Setting password for ansiblerunner" >> /root/post-run.log
-echo "${BASTION_PASSWORD}" | passwd --stdin ansiblerunner
+echo "redhat" | passwd --stdin ansiblerunner
 
 dnf install -y sshpass
 sleep 15
