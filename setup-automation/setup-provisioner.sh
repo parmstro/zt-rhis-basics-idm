@@ -8,27 +8,25 @@ subscription-manager register --activationkey=${ACTIVATION_KEY} --org=12451665 -
 echo "Removing GCP repos" >> /root/post-run.log
 mv /etc/yum.repos.d/google-cloud.repo /root
 
-echo "Adding rhel user" >> /root/post-run.log
-usermod -aG wheel rhel
-
+# just create our ansiblerunner user and add it to the wheel group
 echo "Setting password for rhel" >> /root/post-run.log
-echo 'redhat' | passwd --stdin rhel
+echo "${BASTION_PASSWORD}" | passwd --stdin rhel
 
 echo "Adding ansiblerunner user" >> /root/post-run.log
-useradd -m -G wheel ansiblerunner
+useradd -mG wheel ansiblerunner
 
 echo "Setting password for ansiblerunner" >> /root/post-run.log
-echo 'redhat' | passwd --stdin ansiblerunner
+echo "${BASTION_PASSWORD}" | passwd --stdin ansiblerunner
 
-echo "Configuring ansiblerunner sudo privileges" >> /root/post-run.log
-cat << EOF > /etc/sudoers.d/ansiblerunner
-ansiblerunner ALL=(ALL) NOPASSWD: ALL
-EOF
+cp /etc/sudoers.d/rhel /etc/sudoers.d/ansiblerunner
+sed -i 's/rhel/ansiblerunner/g' /etc/sudoers.d/ansiblerunner
 
 tee -a /root/.ssh/config << EOF
 Host *
     StrictHostKeyChecking no
 EOF
+
+chmod 400 /root/.ssh/config
 
 echo "Adding ansible-core" >> /root/post-run.log
 dnf install -y ansible-core \
