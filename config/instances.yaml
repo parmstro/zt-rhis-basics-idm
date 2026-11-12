@@ -26,7 +26,7 @@ virtualmachines:
 
     routes:
       - name: idm1-webui
-        host: idm1-webui
+        host: idm1
         service: idm1-webui
         targetPort: 80
         tls: true
@@ -58,7 +58,7 @@ virtualmachines:
 
     routes:
       - name: idm2-webui
-        host: idm2-webui
+        host: idm2
         service: idm2-webui
         targetPort: 80
         tls: true
