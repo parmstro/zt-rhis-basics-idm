@@ -66,6 +66,7 @@ A lab environment in this session consists of the following systems:
 * 1 x Red Hat Identity Management (IdM) Replica server - idm2
 * 2 x RHEL systems to function as clients - client1 and client2
 
+image::lab-environment.svg[Lab Environment]
 
 This is a RHIS automation lab, as with all RHIS automation labs, the vast majority of your work will be done from the provisioner node.
 The provisioner node will store your yaml inventory files for configuring the environment.
