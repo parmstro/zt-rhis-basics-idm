@@ -119,7 +119,5 @@ We also create logs of the deployment in the logs directory.
 
 ```
 
-
-
-
 === Examining the Build
+
