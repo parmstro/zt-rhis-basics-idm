@@ -32,7 +32,7 @@ echo "Adding rhel user" >> /root/post-run.log
 usermod -aG wheel rhel
 
 echo "Setting password for rhel" >> /root/post-run.log
-echo 'redhat' | passwd --stdin rhel
+echo "${BASTION_PASSWORD}" | passwd --stdin rhel
 
 echo "Adding ansiblerunner user" >> /root/post-run.log
 useradd -m -G wheel ansiblerunner

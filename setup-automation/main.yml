@@ -77,6 +77,7 @@
       SATELLITE_URL: "{{ satellite_url }}"
       SATELLITE_ORG: "{{ satellite_org }}"
       SATELLITE_ACTIVATIONKEY: "{{ satellite_activationkey }}"
+      BASTION_PASSWORD: "{{ lookup('ansible.builtin.env', 'BASTION_PASSWORD') }}"
 
   - name: Output script result
     ansible.builtin.debug:
