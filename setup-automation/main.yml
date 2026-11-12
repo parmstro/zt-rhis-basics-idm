@@ -67,9 +67,10 @@
 
   - name: Execute setup script if it exists
     when: r_script_test.stat.exists
-    shell: "sh -x /tmp/setup-scripts/setup-{{ ansible_host }}.sh > /tmp/setup-scripts/setup-{{ ansible_host }}.log 2>&1"
+    ansible.builtin.shell: "sh -x /tmp/setup-scripts/setup-{{ ansible_host }}.sh"
     become: true
     register: r_result
+    failed_when: false
     environment:
       GUID: "{{ lookup('ansible.builtin.env', 'GUID') }}"
       DOMAIN: "{{ lookup('ansible.builtin.env', 'DOMAIN') }}"
@@ -79,21 +80,40 @@
 
   - name: Output script result
     ansible.builtin.debug:
-      var: r_result.stdout
+      var: r_result
     when: r_script_test.stat.exists
 
-  - name: Write script result to file
+  - name: Write script result to host log file
     ansible.builtin.copy:
-      content: "{{ r_result.stdout | default(r_result.stderr) | default(r_result) }}"
+      content: |
+        RC: {{ r_result.rc }}
+
+        ==== STDOUT ====
+        {{ r_result.stdout }}
+
+        ==== STDERR ====
+        {{ r_result.stderr }}
+      dest: "/tmp/setup-scripts/setup-{{ ansible_host }}.log"
+    become: true
+    when:
+    - r_result is defined
+    - r_result is not skipped
+
+  - name: Write script result to local output file
+    ansible.builtin.copy:
+      content: |
+        RC: {{ r_result.rc }}
+
+        ==== STDOUT ====
+        {{ r_result.stdout }}
+
+        ==== STDERR ====
+        {{ r_result.stderr }}
       dest: "/tmp/{{ ansible_host }}-setup-script.out"
     delegate_to: localhost
     when:
     - r_result is defined
-
-  - name: Output script result
-    ansible.builtin.debug:
-      var: r_result
-    when: r_result is defined
+    - r_result is not skipped
 
   - name: Fail if stage was failed
     ansible.builtin.fail:
