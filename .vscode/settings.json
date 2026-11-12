@@ -2,6 +2,9 @@
     "files.associations": {
         "site.yml": "yaml"
     },
+    "yaml.customTags": [
+        "!vault scalar"
+    ],
     "yaml.schemas": {
         "https://raw.githubusercontent.com/ansible/schemas/main/f/ansible.json#/$defs/playbook": [
             "!site.yml"
