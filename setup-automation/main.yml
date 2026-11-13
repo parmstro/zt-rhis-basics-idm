@@ -70,8 +70,8 @@
     environment:
       GUID: "{{ lookup('ansible.builtin.env', 'GUID') }}"
       DOMAIN: "{{ lookup('ansible.builtin.env', 'DOMAIN') }}"
-      SATELLITE_URL: "{{ satellite_url }}"
-      SATELLITE_ORG: "{{ satellite_org }}"
+      SATELLITE_URL: "{{  lookup('ansible.builtin.env', 'SATELLITE_URL') }}"
+      SATELLITE_ORG: "{{ lookup('ansible.builtin.env', 'SATELLITE_ORG') }}"
       SATELLITE_ACTIVATIONKEY: "{{ satellite_activationkey }}"
       BASTION_PASSWORD: "{{ lookup('ansible.builtin.env', 'BASTION_PASSWORD') }}"
   
