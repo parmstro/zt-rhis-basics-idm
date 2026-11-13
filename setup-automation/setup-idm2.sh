@@ -4,6 +4,10 @@ echo "testing"
 
 echo "Registering with subscription manager" > /root/post-run.log
 subscription-manager config --rhsm.manage_repos=1
+subscription-manager unregister
+sleep 10
+echo "Registering with activation key: ${ACTIVATION_KEY}" >> /root/post-run.log
+
 subscription-manager register --activationkey=${ACTIVATION_KEY} --org=12451665 --force
 
 echo "Removing GCP repos" >> /root/post-run.log
