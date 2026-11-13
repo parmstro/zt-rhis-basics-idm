@@ -104,6 +104,12 @@ cd rhis-builder-idm
 ----
 
 ```
+[root@provisioner rhis]# cd rhis-builder-idm
+[root@provisioner rhis-builder-idm]# ./build_idm_primary.sh 
+Using rhis-builder-idm to build IdM Primary from inventory
+Start Time: 19:58:49
+SSH password: 
+Vault password: 
 
 ```
 
@@ -118,6 +124,180 @@ If you are interested in the process, please follow the output in the terminal.
 We also create logs of the deployment in the logs directory.
 
 ```
+tart Time: 19:58:49
+SSH password: 
+Vault password: 
 
-=== Examining the Build
+PLAY [Build the idm primary] ********************************************************************************************************************************************
 
+TASK [Gathering Facts] **************************************************************************************************************************************************
+Friday 13 November 2026  20:01:06 +0000 (0:00:00.032)       0:00:00.032 ******* 
+ok: [idm1.example.local]
+
+TASK [Load the vault variables] *****************************************************************************************************************************************
+Friday 13 November 2026  20:01:08 +0000 (0:00:01.641)       0:00:01.674 ******* 
+skipping: [idm1.example.local]
+
+TASK [Load the other variables] *****************************************************************************************************************************************
+Friday 13 November 2026  20:01:08 +0000 (0:00:00.025)       0:00:01.699 ******* 
+skipping: [idm1.example.local]
+
+TASK [Load the vault variables] *****************************************************************************************************************************************
+Friday 13 November 2026  20:01:08 +0000 (0:00:00.020)       0:00:01.720 ******* 
+ok: [idm1.example.local]
+
+TASK [Load the other variables] *****************************************************************************************************************************************
+Friday 13 November 2026  20:01:08 +0000 (0:00:00.038)       0:00:01.759 ******* 
+skipping: [idm1.example.local]
+
+TASK [Apply role idm_pre] ***********************************************************************************************************************************************
+Friday 13 November 2026  20:01:08 +0000 (0:00:00.021)       0:00:01.780 ******* 
+
+TASK [idm_pre : Ensure dns or hosts resolution] *************************************************************************************************************************
+Friday 13 November 2026  20:01:08 +0000 (0:00:00.028)       0:00:01.809 ******* 
+included: /rhis/rhis-builder-idm/roles/idm_pre/tasks/ensure_dns_resolution.yml for idm1.example.local
+
+```
+
+The process takes approximately 25 minutes to compete.
+When it finishes, you will see:
+
+```
+TASK [IdM Primary build complete] ***************************************************************************************************************************************
+Friday 13 November 2026  20:23:27 +0000 (0:00:02.039)       0:22:21.442 ******* 
+ok: [idm1.example.local] => {
+    "msg": [
+        "IdM Primary build complete.",
+        "Web UI: https://idm1.example.local/ipa/ui"
+    ]
+}
+
+RUNNING HANDLER [idm_primary : Restart IPA] *****************************************************************************************************************************
+Friday 13 November 2026  20:23:27 +0000 (0:00:00.124)       0:22:21.567 ******* 
+changed: [idm1.example.local]
+
+RUNNING HANDLER [idm_harden : Restart_ds] *******************************************************************************************************************************
+Friday 13 November 2026  20:23:58 +0000 (0:00:30.814)       0:22:52.381 ******* 
+changed: [idm1.example.local]
+
+PLAY RECAP **************************************************************************************************************************************************************
+idm1.example.local         : ok=375  changed=147  unreachable=0    failed=0    skipped=142  rescued=0    ignored=0   
+
+Friday 13 November 2026  20:24:02 +0000 (0:00:03.551)       0:22:55.932 ******* 
+=============================================================================== 
+redhat.rhel_idm.ipaserver : Install - Setup KRA ------------------------------------- 484.59s
+redhat.rhel_idm.ipaserver : Install - Setup CA -------------------------------------- 255.01s
+idm_pre : Update the system ---------------------------------------------------------- 61.94s
+redhat.rhel_idm.ipaserver : Install - Setup HTTP ------------------------------------- 34.88s
+redhat.rhel_idm.ipaserver : Install - Enable IPA ------------------------------------- 32.52s
+redhat.rhel_idm.ipaserver : Install - Setup DS --------------------------------------- 31.22s
+idm_primary : Restart IPA ------------------------------------------------------------ 30.81s
+redhat.rhel_idm.ipaserver : Install - Setup DNS -------------------------------------- 22.67s
+idm_primary : Create the forward zone ------------------------------------------------ 22.47s
+redhat.rhel_idm.ipaserver : Install - Setup NTP -------------------------------------- 10.86s
+idm_pre : Install IdM packages ------------------------------------------------------- 10.80s
+idm_pre : Check if time servers are reachable (waitsync 2 samples, 10s timeout) ------ 10.56s
+redhat.rhel_idm.ipaserver : Install - Setup ADTRUST ----------------------------------- 9.51s
+redhat.rhel_idm.ipaclient : Install - Create IPA NSS database ------------------------- 5.93s
+redhat.rhel_idm.ipaserver : Install - Setup KRB --------------------------------------- 5.19s
+redhat.rhel_system_roles.rhc : Ensure required packages are installed ----------------- 4.77s
+redhat.rhel_system_roles.firewall : Install firewalld --------------------------------- 4.53s
+redhat.rhel_system_roles.crypto_policies : Ensure required packages are installed ----- 4.42s
+idm_pre : Install chrony for accurate time keeping ------------------------------------ 4.35s
+idm_pre : Install the SOS Report package ---------------------------------------------- 4.11s
+
+End Time: 20:24:02
+Elapsed Time: 00:25:13
+
+```
+
+Congratulations! You have deployed AND configured your IdM Primary in only 25 minutes.
+Yes. There are configurations to make in the templates to make, however, when you need to deploy many systems or many environments, the strength of this process really shines.
+
+=== Finishing Touches
+
+Due to the nature of the lab environment, there are a couple of additional steps that need to take place to make the IdM Web UI available.
+
+Please perform the next steps as root using the idm1 tab.
+The root user is already logged in.
+
+Select the idm1 tab.
+
+[source, bash]
+----
+cd /root
+ls ipa-web.sh
+----
+
+You should see the script.
+
+Execute the ipa-web.sh script.
+
+[source, bash]
+----
+./ipa-web.sh
+----
+
+You should see the following output.
+
+```
+[root@idm1 ~]# ./ipa-web.sh 
+# VERSION 7 - DO NOT REMOVE THIS LINE
+
+RequestHeader set Host idm1.example.local
+RequestHeader set Referer https://idm1.example.local/ipa/ui/
+RewriteEngine on
+
+# Rewrite for plugin index, make it like it's a static file
+RewriteRule ^/ipa/ui/js/freeipa/plugins.js$    /ipa/wsgi/plugins.py [PT]
+
+RewriteCond %{HTTP_HOST}    ^ipa-ca.example.local$ [NC]
+RewriteCond %{REQUEST_URI}  !^/ipa/crl
+RewriteCond %{REQUEST_URI}  !^/(ca|kra|pki|acme)
+[root@idm1 ~]#
+```
+This script modifies the returns, etc.. that are sent by IdM so that the frame in your lab window renders the web pages properly.
+This typically does not need to be done in production. 
+
+There is an additional script that we will run to make sure that our local networks are trusted for recursion.
+
+Again, using the idm1 tab as root.
+
+Select the idm1 tab.
+
+[source, bash]
+----
+cd /root
+ls trustednetwork.sh
+----
+
+You should see the script.
+
+Execute the script.
+
+[source, bash]
+----
+./trustednetwork.sh
+----
+
+You should see the following output
+
+```
+[root@idm1 ~]# ./trustednetwork.sh 
+acl "trusted_network" { 
+    localnets; 
+    localhost; 
+    192.168.0.0/24; 
+};
+allow-recursion { trusted_network; };
+allow-query-cache  { trusted_network; };
+dnssec-validation yes;
+[root@idm1 ~]#
+```
+
+This backs up and then updates the named extensions for Red Hat IdM in the following files.
+
+- /etc/named/ipa-ext.conf
+- /etc/named/ipa-options-ext.conf
+
+**Click Next to move to to Module 5: Examining the Build
