@@ -43,7 +43,7 @@ image::rhis-bootstrap.svg[Typical RHIS Bootstrap Environment]
 
 The Red Hat Infrastructure Standard (RHIS) was created to provide an opinionated design for the deployment of a Red Hat Enterprise Linux platform using Red Hat tooling.
 The goal is to demonstrate how each component is intended to be used and how they fit together to provide an integrated experience.
-The rhis-builder project is the ansible based code and configuration templates designed to implement the RHIS architecture.
+The rhis-builder project encompasses the ansible code and configuration templates designed to implement the RHIS architecture.
 
 RHIS uses a multi node bootstrap model.
 A typical full deployment of RHIS uses a Provisioner Node, an Identity Management (IdM) Primary node, and a Satellite Primary node.
@@ -54,6 +54,9 @@ These can be used to kickstart bare metal, virtual machines or create cloud imag
 If you are using a cloud provider, you can use any minimal RHEL 9 image for the IdM primary and Satellite primary nodes.
 The provisioner node needs some basic package installation. 
 A preparation playbook exists in the bootstrap project to initialize the provisioner.
+
+Once the bootstrap is complete and the AAP environment is up, RHIS hands off the remainder of operations to AAP.
+We are starting right at the beginning of the bootstrap phase. 
 
 In this lab we are focusing on IdM only so we won't have a Satellite in the environment.
 
@@ -87,7 +90,7 @@ A local user account has also been created that you can use:
 [source,bash,subs="+macros,+attributes",role=execute]
 ----
 username: ansiblerunner
-password: {bastion_ssh_password}
+password: redhat
 ----
 
 This user is a member of wheel and has sudo access.
