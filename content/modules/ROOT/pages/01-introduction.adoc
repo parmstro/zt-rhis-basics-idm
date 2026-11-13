@@ -398,17 +398,19 @@ Now you end up with the same SRV record pointing to systems that maintain 2 diff
 Roughly 50% of the time you will get authentication/lookup failures because requests are querying 2 different data sources.
 
 
-----
+'''
 ASIDE:
+
 Customers typically implement something like example.local for the main domain and the domain supported by active directory. 
 AD deployments have been the standard for years. 
 The IdM deployment typically becomes a subdomain like linux.example.local.
 The example.local domain then delegates / forwards requests to linux.example.local. 
 You can use many methodologies to manage migrations to a sub domain.
-----
+
+'''
 
 In your lab you will be implementing a simple flat model without delegation.
 As stated the purpose in the lab is to understand how the automation works for day 1 and day 2 operations vs. all the configuration possibilities of IdM.
 The rhis-builder project will support any allowable IdM configuration.
 
-**Proceed to Module 2**
+**Click next to Proceed to Module 2 - Inventory and Deployments**

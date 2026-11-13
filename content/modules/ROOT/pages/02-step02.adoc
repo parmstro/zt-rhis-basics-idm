@@ -1,4 +1,4 @@
-== Welcome to Module 2
+== Welcome to Module 2 - Inventory and Deployments
 
 === Understanding rhis-builder-inventory and deployments
 
@@ -373,12 +373,65 @@ Examine your deployment.
 Note what directories where created. 
 Examine the some files to see if your basevars where included properly.
 
+Compare your DNS entries in your template to what was rendered.
+
+Template elements.
+Notice the {% raw %} marker starts in the preceding entry.
+The {% endraw %} marker closes in the following entry.
+Variables out side the raw - endraw are not rendered when templated by ansible (jinja2).
+Ansible renders the target network and gives the usable address at an offset.
+
+```
+    {% raw %}a_create_reverse: true
+    state: "present"
+
+  - name: "c3s1n2"
+    zone_name: "{{ _runtime_global_domain_name }}"
+    record_type: "A"
+    {% endraw %}ip_address: "{{ target_net_cidr | ansible.utils.next_nth_usable(481) }}"
+    {% raw %}a_create_reverse: true
+    state: "present"
+
+  - name: "c3s1n3"
+    zone_name: "{{ _runtime_global_domain_name }}"
+    record_type: "A"
+    {% endraw %}ip_address: "{{ target_net_cidr | ansible.utils.next_nth_usable(482) }}"
+    {% raw %}a_create_reverse: true
+    state: "present"
+
+  - name: "c3s1n4"
+    zone_name: "{{ _runtime_global_domain_name }}"
+    record_type: "A"
+    {% endraw %}
+```
+
+Rendered elements. 
+Do the math.
+Does c3s1n1 have the 480th available IP address in the range?
+
+```
+  - name: "c3s1n1"
+    zone_name: "{{ _runtime_global_domain_name }}"
+    record_type: "A"
+    ip_address: "192.168.1.224"
+    a_create_reverse: true
+    state: "present"
+
+  - name: "c3s1n2"
+    zone_name: "{{ _runtime_global_domain_name }}"
+    record_type: "A"
+    ip_address: "192.168.1.225"
+    a_create_reverse: true
+    state: "present"
+```
+
 What happens if you get it wrong??
 (E.g. you forgot to add the --basevars-file parameter to specify example.local_inventory_basevars.yml and it created a savage.test deployment!)
 
 Nothing.
+
 If you accidentally create a savage.test deployment you can simply delete the directory.
 If one of your parameters was incorrect...
 Just fix the config and run the helper script again!
 
-**When you are finished, it is time to move to the next module.**
+**When you are finished, click Next to move to Module3 - Creating your vault file**
