@@ -3,7 +3,9 @@
 # Define the log file paths
 
 subscription-manager config --rhsm.manage_repos=1
-subscription-manager register --activationkey=${ACTIVATION_KEY} --org=12451665 --force
+subscription-manager unregister
+sleep 10
+subscription-manager register --activationkey=${SATELLITE_ACTIVATIONKEY} --org=${SATELLITE_ORG} --force
 
 echo "Removing GCP repos" >> /root/post-run.log
 mv /etc/yum.repos.d/google-cloud.repo /root
