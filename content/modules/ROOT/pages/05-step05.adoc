@@ -1,4 +1,81 @@
-== Welcome to Module 5
+== Welcome to Module 5: Examining the Build
 
-Register clients
-Examine Build features
+In this module you will use the IdM Web UI tab to log into and examine the build of IdM that you created.
+This serves as a guide to the features of IdM and you will see how the results tie back to the configurations that exist in your inventory
+
+Let's begin
+
+=== Examining the Build
+
+Select the IdM Web UI tab.
+Select the Refresh icon on the tab to ensure that the Web UI loads.
+
+If you are not presented with the following screen, please alert your instructor.
+
+image::idm_login_screen.png[IdM Web UI Login screen]
+
+Remember from the configuration of our vault file, we set the following:
+
+```
+ipa_admin_principal_vault: "{{ default_admin_username_vault }}"
+ipa_admin_password_vault: "{{ default_environment_password_vault }}"
+```
+
+And these default values were set to:
+
+```
+default_admin_username_vault: "admin" 
+default_environment_password_vault: "rhisfromscratch"  
+```
+
+Enter these credentials in the login window and click "Login"
+
+You will be presented with the IdM default page: **Identity > Users > Active Users**
+
+images::identity_users_activeusers.png[IdM Web UI Landing Page]
+
+Compare the list of users and their configuration with the list of users in your deployment host_vars.
+
+```
+---
+# Use this section to configure user groups and users
+
+idm_users:
+  - login: "poc-admin"
+    first: "POC"
+    last: "Admin"
+    city: "Hespeler"
+    userstate: "Ontario"
+    departmentnumber: "42"
+    email: "poc_admin@{{ _runtime_global_domain_name }}"
+    employnumber: "13"
+    employeetype: "full-time"
+    title: "POC Administrator"
+    password: "{{ default_environment_password }}"
+  - login: "developer1"
+    first: "Developer"
+    last: "One"
+    city: "Waterloo"
+    userstate: "Ontario"
+    departmentnumber: "53"
+    email: "developer1@{{ _runtime_global_domain_name }}"
+    employnumber: "29"
+    employeetype: "full-time"
+    title: "Senior Developer"
+    password: "{{ default_environment_password }}"
+```
+
+Log out of the IdM Web UI and verify that you can login as developer1 using the default_environment_password.
+The Log out menu item is in the upper right hand corner when you click on the logged in users name. 
+
+image::idm_logout.png[IdM Web UI Logout]
+
+Verify that the user is a "Senior Developer" and has an employee number of 53.
+
+Take time to verify some of the other data.
+Examine DNS entries to ensure that you have service entries.
+Verify that your zones, reverse zones and entries have been created correctly.
+
+
+When you are finished, click Next to move to Module 6: Updating the Configuration
+
