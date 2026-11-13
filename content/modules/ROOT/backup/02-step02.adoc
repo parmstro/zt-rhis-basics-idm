@@ -1,0 +1,43 @@
+
+# snippet saved for adding plugin to vscode
+
+
+=== Alternate method of encrypting or decrypting. 
+There is a simple extension that you can add to your environment that will allow to encrypt and decrypt your vault file on demand with a mouse click.
+
+In VSCode select the Extensions "blocks" icon in the left edge ("blocks" icon 5th from the top) or press Ctrl+Shift+X.
+This will display a list from the Extensions: Marketplace.
+In the search window enter the following:
+
+[source]
+----
+Ansible Vault Inline Extended
+----
+
+Click on the blue "Install" button. 
+
+This extension allows you to create a vault variable file in a directory of your choice and then use the contained password to encrypt and decrypt your vault file.
+If you want to use this extension, you can install it easily
+Then you need to create a vault.txt file to store you vault password. 
+
+[source,bash]
+----
+mkdir ~/.ansible
+# edit and add your password as the only line in the file
+vim ~/.ansible/vault.txt
+----
+
+Enter your password in the file and save.
+
+1. Go back to the VSCode tab.
+2. Select the extensions (Ctrl+Shift+X) and select the Ansible Vault Inline Extended extension.
+3. There is a Gear Icon in the lower right corner of the item. 
+4. Click the gear and select Settings.
+5. In the resulting dialog box, enter the path to your vault.txt file
+6. Exit the dialog.
+
+You should now be able to right click on yaml or json file and encrypt/decrypt it on demand.
+You will see Encrypt/Decrypt with ansible-inline.
+Selecting it will toggle your encrypted file from encrypted to decrypted and back.
+It will also start to stay in the top position so that you can just press Enter to execute.
+This make life easier.
