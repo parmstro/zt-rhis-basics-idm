@@ -285,9 +285,12 @@ cd /home/ansiblerunner/rhis/rhis-builder-inventory
 ----
 
 '''
-NOTE: I you experience an error like:
+NOTE: 
+
+I you experience an error like the following:
 
 Failed to obtain podman configuration: mkdir /run/user/0/libpod: permission denied
+
 It means that there may have been an issue with your system during provisioning.
 Running the following commands will correct the issue:
 
@@ -298,6 +301,7 @@ sudo chown ansiblerunner:ansiblerunner /run/user/$(id -u ansiblerunner)
 export XDG_RUNTIME_DIR=/run/user/$(id -u ansiblerunner)
 ----
 Now you can retry...
+
 '''
 
 Your output should be similar to:
