@@ -32,7 +32,7 @@ Enter these credentials in the login window and click "Login"
 
 You will be presented with the IdM default page: **Identity > Users > Active Users**
 
-images::identity_users_activeusers.png[IdM Web UI Landing Page]
+image::identity_users_activeusers.png[IdM Web UI Landing Page]
 
 Compare the list of users and their configuration with the list of users in your deployment host_vars.
 

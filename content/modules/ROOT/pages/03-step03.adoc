@@ -64,6 +64,9 @@ $ANSIBLE_VAULT;1.1;AES256
 ...
 ```
 
+Press q to get back to the command prompt.
+
+
 === Editing the vault file
 
 Again from the provisioner tab as ansiblerunner.
@@ -210,6 +213,7 @@ The script is named after your deployment.
 You should be able to find it in the root of the project.
 [source,bash]
 ----
+cd /home/ansiblerunner/rhis/rhis-builder-inventory
 ls example.local.25.sh
 ----
 

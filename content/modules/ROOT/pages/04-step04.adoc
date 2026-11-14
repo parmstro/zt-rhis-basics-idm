@@ -124,7 +124,7 @@ If you are interested in the process, please follow the output in the terminal.
 We also create logs of the deployment in the logs directory.
 
 ```
-tart Time: 19:58:49
+Start Time: 19:58:49
 SSH password: 
 Vault password: 
 
@@ -300,4 +300,4 @@ This backs up and then updates the named extensions for Red Hat IdM in the follo
 - /etc/named/ipa-ext.conf
 - /etc/named/ipa-options-ext.conf
 
-**Click Next to move to to Module 5: Examining the Build
+**Click Next to move to to Module 5: Examining the Build**
